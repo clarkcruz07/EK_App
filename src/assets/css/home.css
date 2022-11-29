@@ -1,0 +1,88 @@
+.option-lang {
+    display: flex;
+    justify-content: space-evenly;
+    width: 200px !important;
+    align-items: center;
+    height: 50px;
+    font-size: 18px;
+}
+
+.option-lang div {
+    padding: 10px 0;   
+    width: 50%;
+    background-color: #f6f6f6;
+    color: #9a9a9a;
+}
+
+.option-lang div.active {
+    background-image: linear-gradient(180deg, #50BA84 0%, #15ABD0 100%);
+    color: #fff;
+}
+
+.option-lang div:nth-child(1) {
+    border-radius: 20px 0 0 20px;
+}
+
+.option-lang div:nth-child(2) {
+    border-radius: 0 20px 20px 0;
+}
+input[type="radio"] {
+    display: none;
+}
+
+.modal-button {
+    position: fixed;
+    right: 18%;
+    z-index: 999999999;
+    top: 44%;
+}
+
+.modal-button div button {
+    width: 176px;
+    height: 42px;
+    border-radius: 10px;
+    border: 0;
+    color: #fff;
+}
+
+.modal-button div:nth-child(1) button{
+    background-color: #16D391;
+}
+
+.modal-button div:nth-child(2) button {
+    background-color: #FF0D0D;
+}
+
+.eye-icon{
+    position: absolute;
+    top: 0;
+    right: 1rem;
+}
+
+.password{
+    -webkit-text-security: disc;
+}
+
+.modal.modal-first {
+    height: 819px !important;
+    top: 20% !important;
+}
+
+.qr-border {
+    width: 250px;
+    height: 250px;
+    border: 1px solid #707070;
+    border-radius: 50px;
+}
+
+canvas{
+    width: 170px !important;
+    height: 170px !important;
+}
+
+.lf-player-container svg {
+    position: absolute;
+    top: 25rem;
+    left: 0;
+    height: 10rem !important;
+}

@@ -1,0 +1,18 @@
+{
+  "LockerDetails": [
+    {
+      "transID": "",
+      "lockerLocation": "",
+      "doorSize": "",
+      "doorNumber": "",
+      "paymentStatus": "",
+      "transactionStatus": "",
+      "payType": "",
+      "amount": "",
+      "doorOpenCount": "",
+      "mpin":"",
+      "timeIn": "",
+      "timeOut": ""
+    }
+  ]
+}
