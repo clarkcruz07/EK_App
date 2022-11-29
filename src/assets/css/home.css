@@ -53,6 +53,14 @@ input[type="radio"] {
     background-color: #FF0D0D;
 }
 
+.btn-cancel button {
+    background-color: #FF0D0D;
+    border: 0;
+    color: #FFF;
+    border-radius: 10px;
+    width: 176px;
+    height: 42px;
+}
 .eye-icon{
     position: absolute;
     top: 0;
@@ -81,8 +89,8 @@ canvas{
 }
 
 .lf-player-container svg {
-    position: absolute;
-    top: 25rem;
+    position: relative;
+    top: 0;
     left: 0;
-    height: 10rem !important;
+    height: 7rem !important;
 }

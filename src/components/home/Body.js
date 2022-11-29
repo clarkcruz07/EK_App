@@ -1,6 +1,7 @@
 import React, {useEffect, useState, useRef} from 'react'
 import axios from 'axios'
 import lockerFree from '../../assets/img/lockerFree.svg'
+import lockerOccupied from '../../assets/img/lockerOccupied.svg'
 import swal from 'sweetalert2'
 import eyeIcon from '../../assets/img/eyeIcon.svg'
 import { Player } from '@lottiefiles/react-lottie-player';
@@ -28,6 +29,8 @@ export const Body = () =>{
     const [postNewpin, setPin] = useState('')
     const [checkoutURL, setcheckoutURL] = useState('')
     const [loader, setLoader] = useState('')
+
+    const [imgURL, setImgUrl] = useState(false)
     const APIUrl = 'http://localhost:3000/LockerDetails'
     const doorURL = 'http://localhost:9090/api/lockercontroller/door/'
     let url = ""
@@ -37,9 +40,28 @@ export const Body = () =>{
     
         axios
         .get(getDoorUrl)
-        .then((res) => {
+        .then((response) => {
+           
+            fetchDoors(response.data.data.doors)
+
+            {Object.keys(response.data.data.doors).map((key) => {
+                axios
+                .get(APIUrl+'/?doorNumber='+key)
+                .then((res) => {
+                    console.log(res)
+                   
+                
+                })
+                .catch((err) => {
+                    console.log(err)
+                })
+            })}
+
             
-            fetchDoors(res.data.data.doors)
+            
+                
+            
+                /**/
             
         })
         .catch((err) => {
@@ -89,6 +111,7 @@ export const Body = () =>{
         setDoorID(0)
         setCart('')
         setInput('')
+        setNewModal('')
     }
 
     const postPayment = () => {
@@ -175,7 +198,34 @@ export const Body = () =>{
                         const status = response.data.attributes.status 
                         if(status == 'paid'){
                             const api = doorURL+doorID+'/open'
-                            axios.get(api).then(res => { 
+                            axios.get(api).then(res => {
+                                fetch('http://localhost:3000/LockerDetails', {
+                                    method: 'POST',
+                                    headers: {
+                                      'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({
+                                        transID: "",
+                                        lockerLocation: process.env.REACT_APP_LOCKER_LOCATION,
+                                        doorSize: "S",
+                                        doorNumber: doorID,
+                                        doorStatus: 1,
+                                        paymentStatus: 'paid',
+                                        payType: 'gcash',
+                                        amount: '250.00',
+                                        doorOpenCount: "",
+                                        mpin: cart,
+                                        timeIn: new Date().toLocaleString(),
+                                        timeOut: ""
+                                    })
+                                })
+
+                                setOverlay('')
+                                setModal('')
+                                setDoorID(0)
+                                setCart('')
+                                setInput('')
+                                setNewModal('') 
                             }).catch(err => { 
                                 console.log(err)
                             });
@@ -196,7 +246,7 @@ export const Body = () =>{
     },[])
     useEffect((e) => {
         
-        if(cart.length > 15){
+        if(cart.length > 5){
             setDisable(true)
             setPoint('pointer')
         }
@@ -241,6 +291,8 @@ export const Body = () =>{
                     <div className="text-center py-4">{process.env.REACT_APP_LOCKER_PRICE}</div>
                     <div className="text-center">Whole day or until final checkout</div>
                     <div className="text-center"> <Player src={loader} loop autoplay /> </div>
+                    <div className="text-center"> Waiting for payment </div>
+                    <div className="text-center btn-cancel pt-5"><button onClick={cancelTransaction}>Cancel</button></div>
                 </div>
 
               
@@ -274,12 +326,14 @@ export const Body = () =>{
             
             <div className="position-relative rounded-big col-md-12 mx-auto body-content d-flex justify-content-start flex-wrap">
             
-                {Object.keys(listDoors).map((key) => {
+                {Object.keys(listDoors).map((key, value) => {
+                  
                     return (
                     <div key={key} className="col-md-3 d-flex justify-content-center align-items-center px-2 py-2" onClick={() => postData(key)}>
                         <h2 className="position-absolute">
                         {key}                        
                         </h2>
+                        
                         <img src={lockerFree} />
                     </div>
                     );
