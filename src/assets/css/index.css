@@ -77,7 +77,7 @@ a:hover {
     z-index: 99999999999 !important;
     position: absolute !important;
     width: 510px !important;
-    height: 190px !important;
+    height: 230px !important;
     background: #fff;
     border-radius: 10px;
     top: 30% !important;
@@ -101,9 +101,9 @@ a:hover {
 
 .modal.second {
     position: absolute;
-    height: 370px !important;
+    height: 400px !important;
     width: 290px !important;
-    margin-top: 14rem;
+    margin-top: 15rem;
     margin-left: 7rem;
 }
 
@@ -138,5 +138,20 @@ a:hover {
 }
 .pointer{
     pointer-events: none;
+}
+
+.btn-success {
+    background-color: #16D391 !important;
+} 
+.btn-default {
+    border: 1px solid #ccc !important;
+    background-color: #fff !important;
+}
+
+input[type="text"] {
+    outline: 0;
+    border: 0;
+    height: 95%;
+
 }
 /* */

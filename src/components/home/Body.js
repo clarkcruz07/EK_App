@@ -7,11 +7,15 @@ import eyeIcon from '../../assets/img/eyeIcon.svg'
 import { Player } from '@lottiefiles/react-lottie-player';
 import dataLoading from '../../assets/json/ekLoader.json'
 import QRCode from "qrcode.react";
+import { useNavigate } from 'react-router-dom'
+
 export const Body = () =>{
+    const navigate = useNavigate();
     const [listDoors, fetchDoors] = useState([])
     const [doorID, setDoorID] = useState('')
     const [overlay, setOverlay] = useState('')
     const [modal, setModal] = useState('')
+    const [modalUpdate, setUpdateModal] = useState('')
     const [newmodal, setNewModal] = useState('')
     const getDoorUrl = 'http://localhost:9090/api/lockercontroller/doors'
   
@@ -23,55 +27,74 @@ export const Body = () =>{
     const [disableNewPin, setDisableNewPin] = useState(false)
     const [pointNewPin, setPointNewPin] = useState('')
 
-    const [indexing, setIndex] = useState('')
     const [showPin, setShowText] = useState('')
 
     const [postNewpin, setPin] = useState('')
     const [checkoutURL, setcheckoutURL] = useState('')
     const [loader, setLoader] = useState('')
 
-    const [imgURL, setImgUrl] = useState(false)
+    const [doorStatus, setDoorStatus] = useState('')
+    const [errorStatus, setErrorStatus] = useState('')
+
+    const [alias, setAlias] = useState('')
     const APIUrl = 'http://localhost:3000/LockerDetails'
     const doorURL = 'http://localhost:9090/api/lockercontroller/door/'
     let url = ""
     let dataInterval = ""
     let transID = ""
+    let newarr = []
     const fetchData = () => {
-    
-        axios
-        .get(getDoorUrl)
-        .then((response) => {
-           
-            fetchDoors(response.data.data.doors)
-
-            {Object.keys(response.data.data.doors).map((key) => {
+        axios.get(APIUrl).then((res) => {
+            
+            if(res.data.length == 0){
                 axios
-                .get(APIUrl+'/?doorNumber='+key)
-                .then((res) => {
-                    console.log(res)
-                   
-                
+                .get(getDoorUrl)
+                .then((response) => {
+                newarr = response.data.data.doors
+                    {Object.keys(response.data.data.doors).map((key) => {
+                        fetch(APIUrl, {
+                            method: 'POST',
+                            headers: {
+                            'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                transID: "",
+                                lockerLocation: process.env.REACT_APP_LOCKER_LOCATION,
+                                doorSize: "S",
+                                doorStatus: 0,
+                                paymentStatus: '',
+                                payType: '',
+                                amount: process.env.REACT_APP_LOCKER_PRICE,
+                                doorOpenCount: "",
+                                mpin: "",
+                                timeIn: "",
+                                timeOut: "",
+                                img_url: lockerFree,
+                                alias:""
+                            })
+                        })
+                    })}
+                    
                 })
                 .catch((err) => {
                     console.log(err)
                 })
-            })}
+            }
+            else {
+                fetchDoors(res.data)
+            }
+        })
+        /*
+            
+*/
 
-            
-            
-                
-            
-                /**/
-            
-        })
-        .catch((err) => {
-            console.log(err)
-        })
+        
     }
-    const postData = (key) => {
+    const postData = (key,status) => {
         setOverlay('hidden')
         setModal('hidden')
         setDoorID(key)
+        setDoorStatus(status)
     }
     const showText = () => {
         setShowText('password')
@@ -194,32 +217,29 @@ export const Body = () =>{
                   fetch('https://api.paymongo.com/v1/payments', options)
                     .then(response => response.json())
                     .then(response => {
-                        console.log(process.env.REACT_APP_LOCKER_LOCATION)
                         const status = response.data.attributes.status 
                         if(status == 'paid'){
                             const api = doorURL+doorID+'/open'
                             axios.get(api).then(res => {
-                                fetch('http://localhost:3000/LockerDetails', {
-                                    method: 'POST',
-                                    headers: {
-                                      'Content-Type': 'application/json',
-                                    },
-                                    body: JSON.stringify({
-                                        transID: "",
-                                        lockerLocation: process.env.REACT_APP_LOCKER_LOCATION,
-                                        doorSize: "S",
-                                        doorNumber: doorID,
-                                        doorStatus: 1,
-                                        paymentStatus: 'paid',
-                                        payType: 'gcash',
-                                        amount: '250.00',
-                                        doorOpenCount: "",
-                                        mpin: cart,
-                                        timeIn: new Date().toLocaleString(),
-                                        timeOut: ""
-                                    })
-                                })
+                                
+                            axios.patch('http://localhost:3000/LockerDetails/'+doorID, {
+                                doorStatus: 1,
+                                paymentStatus: 'paid',
+                                payType: process.env.REACT_APP_PAYTYPE,
+                                doorOpenCount: 1,
+                                mpin: cart,
+                                timeIn: new Date().toLocaleString(),
+                                timeOut: '',
+                                img_url: lockerOccupied,
+                                alias: alias
 
+                            }).then(resp => {
+                                console.log(resp.data);
+                                fetchData()
+                            }).catch(error => {
+                                console.log(error);
+                            });
+                                
                                 setOverlay('')
                                 setModal('')
                                 setDoorID(0)
@@ -241,6 +261,64 @@ export const Body = () =>{
             .catch(err => console.error(err));
     }
 
+    const goHome = (pin, doorid) => {
+        axios.get('http://localhost:3000/LockerDetails/?id='+doorid+'&&mpin='+pin).then(res => {
+            if(res.data.length == 1){
+                const api = doorURL+doorid+'/open'
+                axios.get(api).then(res => {
+                    axios.patch('http://localhost:3000/LockerDetails/'+doorid, {
+                        doorStatus: 0,
+                        doorOpenCount: 1,
+                        mpin: cart,
+                        timeOut: new Date().toLocaleString(),
+                        img_url: lockerFree
+
+                    }).then(resp => {
+                        console.log(resp.data);
+                        fetchData()
+                    }).catch(error => {
+                        console.log(error);
+                    });
+                }).catch(err => { 
+                    console.log(err)
+                });
+                setOverlay('')
+                setModal('')
+                setDoorID(0)
+                setCart('')
+                setInput('')
+                setNewModal('')
+            }
+            else {
+                setErrorStatus('Wrong Mpin, cannot open door!')
+            }
+            
+        })
+    }
+    const reopenDoor = (pin,doorid) => {
+        console.log(pin + "-"+doorid)
+            axios.get('http://localhost:3000/LockerDetails/?id='+doorID+'&&mpin='+pin).then(res => {
+                if(res.data.length == 1){
+                    const api = doorURL+doorid+'/open'
+                    axios.get(api).then(res => {
+                        
+                    }).catch(err => { 
+                        console.log(err)
+                    });
+                    setOverlay('')
+                    setModal('')
+                    setDoorID(0)
+                    setCart('')
+                    setInput('')
+                    setNewModal('')
+                }
+                else {
+                    setErrorStatus('Wrong Mpin, cannot open door!')
+                }
+                
+            })
+        /**/
+    }
     useEffect(() => {
         fetchData()       
     },[])
@@ -269,14 +347,38 @@ export const Body = () =>{
 
     return (
         <div className="row">
+             
             <div className={overlay ? 'overlay' : 'overlay hidden'}></div>
             <div className={modal ? 'modal' : 'modal hidden'}>
-                <div className="modal-title pt-3"> Door {doorID} </div>
-                <div className="modal-body modal-title mx-3 py-2">Status: <span className="door-status">Free</span>
+                <div className="modal-title pt-3 color-green">Set pin for door #{doorID} </div>
+                <div className="modal-body modal-title mx-3 py-2">Status: 
+                {
+                    (() => {
+                        if(doorStatus == 0) {
+                            const status = <span className="door-status color-green"> Free</span>
+                            return status
+                        }
+                        else if(doorStatus == 1){
+                            const status = <span className="door-status color-red"> Occupied</span>
+                            return status
+                        }   
+                    })()  
+                }  
+
+                {
+                    (() => {
+                        if(doorStatus == 0) {
+                            const status = <div className="txt-pin col-md-11 mx-auto mt-3 px-3 position-relative "><input type="text" placeholder='Set locker nickname' maxLength={12} onChange={(e) => setAlias(e.target.value)}/></div>
+                            return status
+                        }  
+                    })()  
+                }  
+
+                    
                     <div className={showPin  ? 'txt-pin col-md-11 mx-auto mt-3 px-3 position-relative ' : 'txt-pin col-md-11 mx-auto mt-3 px-3 position-relative password'} id="number-input" onChange={saveInput}>{cart}
                     <div className="eye-icon" id="eye-icon" onClick={showText}><img src={eyeIcon} /></div>  
                     </div>  
-                    
+                    <div className="px-3"><h6 className="color-red">{errorStatus}</h6></div>
                     
                 </div>
 
@@ -284,13 +386,13 @@ export const Body = () =>{
             </div>
 
             <div className={newmodal ? 'modal modal-first' : 'modal hidden'}>
-                <div className="modal-title pt-3"> Door {doorID} </div>
+                <div className="modal-title pt-3">Door {doorID} </div>
                 <div className="modal-body modal-title mx-3 py-2">
                     <div className="text-center py-4">Scan to pay</div>
                     <div className="qr-border d-flex justify-content-center align-items-center mx-auto"><QRCode value={checkoutURL}/></div> 
                     <div className="text-center py-4">{process.env.REACT_APP_LOCKER_PRICE}</div>
                     <div className="text-center">Whole day or until final checkout</div>
-                    <div className="text-center"> <Player src={loader} loop autoplay /> </div>
+                    <div className="text-center lottie"> <Player src={loader} loop autoplay /> </div>
                     <div className="text-center"> Waiting for payment </div>
                     <div className="text-center btn-cancel pt-5"><button onClick={cancelTransaction}>Cancel</button></div>
                 </div>
@@ -299,8 +401,8 @@ export const Body = () =>{
             </div>
 
             <div className={modal ? 'modal second' : 'modal hidden second'}>
-                
-                <div className="modal-number-section d-flex justify-content-evenly align-items-center flex-wrap pt-2">
+                <div className="py-2">Tap to set pin</div>
+                <div className="modal-number-section d-flex justify-content-evenly align-items-center flex-wrap">
                     <div onClick={() => handleClick(1)} disabled={disable} id="btn-number" className={point ? 'pointer' : ''}>1</div>
                     <div onClick={() => handleClick(2)} disabled={disable} id="btn-number" className={point ? 'pointer' : ''}>2</div>
                     <div onClick={() => handleClick(3)} disabled={disable} id="btn-number" className={point ? 'pointer' : ''}>3</div>
@@ -317,8 +419,22 @@ export const Body = () =>{
                     
                 </div>
                     <div className="modal-button">
-                        <div className="my-2"><button disabled={disableNewPin} className={pointNewPin ? 'my-2 pointer' : 'my-2'} onClick={() => postPin(cart,doorID)}>Set new pin</button></div>
-                        <div className="my-2"><button onClick={cancelTransaction}>Cancel</button></div>
+                    {
+                    (() => {
+                        if(doorStatus == 0) {
+                            const status = <div className="my-2"><button disabled={disableNewPin} className={pointNewPin ? 'my-2 pointer btn btn-success' : 'my-2 btn btn-success'} onClick={() => postPin(cart,doorID)}>Set pin</button></div>
+                            return status
+                        }
+                        else if(doorStatus == 1){
+                            const status = <div><div className="my-2"><button disabled={disableNewPin} className={pointNewPin ? 'my-2 pointer btn btn-success' : 'my-2 btn btn-success'} onClick={() => reopenDoor(cart,doorID)}>Open locker</button></div>
+                            <div className="my-2"><button disabled={disableNewPin} className={pointNewPin ? 'my-2 pointer btn btn-danger' : 'my-2 btn btn-danger'} onClick={() => goHome(cart,doorID)}>Going home</button></div></div>
+                            
+                            return status
+                        }   
+                    })()  
+                    }  
+                        
+                        <div className="my-2"><button onClick={cancelTransaction} className="btn btn-default text-dark">Cancel</button></div>
                                                 
                     </div>
                 
@@ -326,18 +442,39 @@ export const Body = () =>{
             
             <div className="position-relative rounded-big col-md-12 mx-auto body-content d-flex justify-content-start flex-wrap">
             
-                {Object.keys(listDoors).map((key, value) => {
-                  
-                    return (
-                    <div key={key} className="col-md-3 d-flex justify-content-center align-items-center px-2 py-2" onClick={() => postData(key)}>
-                        <h2 className="position-absolute">
-                        {key}                        
-                        </h2>
-                        
-                        <img src={lockerFree} />
-                    </div>
-                    );
-                })}
+        
+
+            {
+                listDoors
+                    .map(
+                        item => 
+                        {
+                            if(item.doorStatus == 1){
+                                const doorStats = <div key={item.id} className="col-md-3 d-flex justify-content-center align-items-center px-2 py-2" onClick={() => postData(item.id, item.doorStatus)}>
+                                     
+                                <h2 className="position-absolute color-white">
+                                   {item.id}               
+                                </h2>
+                                <img src={item.img_url} />
+                                <h5 className="color-white position-absolute mt-5">{item.alias}</h5> 
+                                </div>
+                                return doorStats   
+                            }
+                            else {
+                                const doorStats = <div key={item.id} className="col-md-3 d-flex justify-content-center align-items-center px-2 py-2" onClick={() => postData(item.id, item.doorStatus)}>
+                                     
+                                <h2 className="position-absolute">
+                                   {item.id}               
+                                </h2>
+                                <img src={item.img_url} /> 
+                                </div>
+                                return doorStats   
+                            }
+                                
+                        }
+                    )
+                    
+                }
             </div>
         </div>
     )

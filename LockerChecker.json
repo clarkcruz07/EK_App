@@ -1,19 +1,4 @@
 {
   "LockerDetails": [
-    {
-      "transID": "",
-      "lockerLocation": "Locker A",
-      "doorSize": "S",
-      "doorNumber": "1",
-      "doorStatus": 1,
-      "paymentStatus": "paid",
-      "payType": "gcash",
-      "amount": "250.00",
-      "doorOpenCount": "",
-      "mpin": "11111",
-      "timeIn": "11/29/2022, 4:23:22 PM",
-      "timeOut": "",
-      "id": 1
-    }
   ]
 }

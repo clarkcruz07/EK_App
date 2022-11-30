@@ -34,7 +34,7 @@ input[type="radio"] {
     position: fixed;
     right: 18%;
     z-index: 999999999;
-    top: 44%;
+    top: 45%;
 }
 
 .modal-button div button {
@@ -45,13 +45,6 @@ input[type="radio"] {
     color: #fff;
 }
 
-.modal-button div:nth-child(1) button{
-    background-color: #16D391;
-}
-
-.modal-button div:nth-child(2) button {
-    background-color: #FF0D0D;
-}
 
 .btn-cancel button {
     background-color: #FF0D0D;
@@ -88,9 +81,26 @@ canvas{
     height: 170px !important;
 }
 
-.lf-player-container svg {
+.lottie .lf-player-container svg {
     position: relative;
     top: 0;
     left: 0;
     height: 7rem !important;
+}
+
+.color-white{
+    color: #fff;
+}
+
+.color-green {
+    color: #0BA100;
+}
+.color-red {
+    color: #FF0D0D;
+}
+.home{
+    position: absolute;
+    z-index: 9999999;
+    top: 0;
+    left: 0;
 }
