@@ -58,11 +58,11 @@ a:hover {
     width: 100%;
     height: 100vh;
     background-color: #000;
-    opacity: 0.5;
+    opacity: 0.7;
     position: fixed;
     top: 0;
     left: 0;
-    z-index: 999999999;
+    z-index: 99999;
 }
 .hidden {
     display: none;
@@ -71,18 +71,21 @@ a:hover {
 .modal.hidden{
     display: none !important;
 }
-
+.qr-border.hidden{
+    display: none !important;
+}
 .modal {
     display: block !important;
-    z-index: 99999999999 !important;
+    z-index: 99999 !important;
     position: absolute !important;
     width: 510px !important;
-    height: 230px !important;
+    height: 240px !important;
     background: #fff;
     border-radius: 10px;
-    top: 30% !important;
+    top: 15% !important;
     left: 26% !important;
     color: #000;
+    overflow: hidden !important;
 }
 
 .modal-title {
@@ -99,15 +102,8 @@ a:hover {
    
 }
 
-.modal.second {
-    position: absolute;
-    height: 400px !important;
-    width: 290px !important;
-    margin-top: 15rem;
-    margin-left: 7rem;
-}
 
-.modal-number-section > div {
+.modal-number-section #btn-number {
     width: 70px;
     height: 70px;
     align-items: center;
@@ -121,20 +117,18 @@ a:hover {
     background-color: #F3F3F3;
 }
 
-.modal-number-section > div:nth-child(10), .modal-number-section > div:nth-child(12) {
-    font-size: 15px;
-    border: 0;
-    
+.modal-number-section {
+    width: 260px !important;
+    margin: 0 auto;
 }
 
-.modal-number-section > div:nth-child(10) {
-    background-color: #FF9100;
-    color: #000;
-}
 
-.modal-number-section > div:nth-child(12) {
+.modal-number-section > div:nth-child(11) {
     background-color: #FF0D0D;
     color: #fff;
+    font-size: 23px;
+    border: 0;
+    width: 60%;
 }
 .pointer{
     pointer-events: none;

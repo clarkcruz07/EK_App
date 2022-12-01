@@ -29,17 +29,51 @@
 input[type="radio"] {
     display: none;
 }
-
+.modal.second.occupied
 .modal-button {
-    position: fixed;
-    right: 18%;
-    z-index: 999999999;
-    top: 45%;
+    position: absolute;
+    top: 78%;
+    left: 5rem;
 }
 
+.modal.second.free
+.modal-button {
+    position: absolute;
+    top: 65%;
+    left: 5rem;
+}
+.lottie-wrapper {
+    bottom: 13rem;
+    width: 426px;
+    left: 2.5rem;
+}
+
+.modal.second.occupied .lottie-multiple{
+    border: 1px solid #707070;
+    border-radius: 10px;
+    height: 107px;
+}
+.modal.second.occupied .lottie-multiple.active{
+    border: 1px solid #16D391;
+    border-radius: 10px;
+    height: 107px;
+    color: #16D391;
+}
+.lottie-multiple .lf-player-container{
+    width: 136px;
+}
+.lottie-multiple div {
+    text-align: left;
+    margin-right: 1rem;
+}
+.lottie-multiple div small {
+    color: #3D3D3D;
+    opacity: 0.5;
+    font-weight: bold;
+}
 .modal-button div button {
-    width: 176px;
-    height: 42px;
+    width: 365px;
+    height: 60px !important;
     border-radius: 10px;
     border: 0;
     color: #fff;
@@ -103,4 +137,33 @@ canvas{
     z-index: 9999999;
     top: 0;
     left: 0;
+}
+.btn-success, .btn-danger {
+    height: 5rem !important;
+}
+.col-door{
+    width: 20% !important;
+}
+.bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+.modal.second.occupied {
+    position: absolute;
+    height: 57rem !important;
+    width: 510px !important;
+    margin-top: 11rem;
+    margin-left: 0;
+}
+.modal.second.free {
+    position: absolute;
+    height: 590px !important;
+    width: 510px !important;
+    margin-top: 14rem;
+    margin-left: 0;
+}
+
+.clear{
+    height: 70px !important;
 }

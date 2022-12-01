@@ -4,11 +4,12 @@ import Body from './Body'
 import Footer from './Footer'
 import { Player } from '@lottiefiles/react-lottie-player';
 import loader from '../../assets/json/ekIdle.json'
+import BG from '../../assets/json/ekBG.json'
 import {Link} from 'react-router-dom'
 import useAutoLogout from "./IdleTimeout";
 export const Home = () =>{
     const videoBg = './assets/gradientBG.mp4'
-    let timer = useAutoLogout(32);
+    let timer = useAutoLogout(100);
 
     //const [loading, setLoader] = useState(loader)
     if(timer == 0){
@@ -27,9 +28,15 @@ export const Home = () =>{
             />
             </div>
            
-            <Link to="/"><video autoPlay muted loop id="videoBg">
-            <source src={videoBg} type="video/mp4" />
-            </video>
+            <Link to="/">
+                <div className="bg">
+                    <Player 
+                    src={BG}
+                    loop
+                    autoplay
+                     />
+                </div>
+            
             <Header /> 
             <Body />
             <Footer />   
