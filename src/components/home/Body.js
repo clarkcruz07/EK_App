@@ -12,7 +12,7 @@ import QRCode from "qrcode.react";
 
 export const Body = () =>{
     const [listDoors, fetchDoors] = useState([])
-    const [doorID, setDoorID] = useState('')
+    const [doorID, setDoorID] = useState(0)
     const [overlay, setOverlay] = useState('')
     const [modal, setModal] = useState('')
     const [newmodal, setNewModal] = useState('')
@@ -29,7 +29,7 @@ export const Body = () =>{
     const [showPin, setShowText] = useState('')
     const [disableBtn, setDisableBtn] = useState(true)
     const [postNewpin, setPin] = useState('')
-    const [checkoutURL, setcheckoutURL] = useState('')
+    const [checkoutURL, setcheckoutURL] = useState(null)
     const [loader, setLoader] = useState('')
 
     const [doorStatus, setDoorStatus] = useState('')
@@ -39,11 +39,11 @@ export const Body = () =>{
     const [activeReopen, setActive] = useState('')
     const [alias, setAlias] = useState('')
     const [activeLottie, setActiveLottie] = useState(0)
+    const [urlSet, setURL] = useState('')
     const APIUrl = 'http://localhost:3000/LockerDetails'
     const doorURL = 'http://localhost:9090/api/lockercontroller/door/'
-    let url = ""
+    
     let dataInterval = ""
-    let transID = ""
     let newarr = []
     const fetchData = () => {
         axios.get(APIUrl).then((res) => {
@@ -98,7 +98,9 @@ export const Body = () =>{
     const postData = (key,status) => {
         setOverlay('hidden')
         setModal('hidden')
+        
         setDoorID(key)
+        localStorage.setItem('doorID',key)
         setDoorStatus(status)
     }
     const showText = () => {
@@ -129,9 +131,10 @@ export const Body = () =>{
             console.log(res.data.length)
             if(res.data.length == 1){
                 setErrorStatus('Duplicate alias is not allowed')
+                
             }
             else {
-                postPayment(pin)
+                postPayment(pin,doorNumber)
                 setModal('')
                 setNewModal('hidden')
             }
@@ -161,11 +164,15 @@ export const Body = () =>{
         setActive('')
         setAlias('')
         setPin('')
+        setcheckoutURL(null)
+        localStorage.removeItem('transID')
         document.getElementById('alias-text').value = ""
+        clearInterval(dataInterval)
+     
     }
-
-    const postPayment = (pin) => {
-                 
+    const postPayment = (pin,door_number) => {
+        
+        localStorage.removeItem('transID')
                 const options = {
                     method: 'POST',
                     headers: {
@@ -190,21 +197,47 @@ export const Body = () =>{
                   
                   fetch('https://api.paymongo.com/v1/sources', options)
                     .then(response => response.json())
-                    .then(response => {                
-                        setcheckoutURL(response.data.attributes.redirect.checkout_url)
-                        document.getElementById('qr').classList.remove('hidden')
-                        localStorage.setItem('transID', response.data.id)
-        
-                        dataInterval = setInterval(()=> {
-                            fetchPaymentStatus(pin)
-                        },1000)
+                    .then(response => {         
+                           
+                        //console.log(response.data.id);
+                       
                         setLoader(dataLoading)
-                        //console.log(timerData)
+                        
+                        
+                        
+                        //console.log(pin)
+                        dataInterval = setInterval(()=> {
+                            
+                            if(response.data.id == undefined || response.data.id == null){
+                                console.log('undefined')
+                            }
+                            if(response.data.id.length != '') {
+                                fetchPaymentStatus(pin,door_number)
+                                setURL('1')
+                                document.getElementById('qr').classList.remove('hidden')                     
+                            } 
+                            else {
+                                setURL('0')
+                            }
+                           
+                        },1000)
+                        setcheckoutURL(response.data.attributes.redirect.checkout_url)
+                        localStorage.setItem('transID', response.data.id)
                         return () => clearInterval(dataInterval) 
+                        
+                        //
+                       
+                        
+                        
+                        
+                        //console.log(timerData)
+                        //
         
         
                     })
-                    .catch(err => console.error(err));
+                    .catch((err)=> {
+                        console.log(err)
+                    })
             
       
        
@@ -212,8 +245,10 @@ export const Body = () =>{
 
     }
 
-    const fetchPaymentStatus = (pin) => {
-        const id = localStorage.getItem('transID')
+    const fetchPaymentStatus = (pin,door_number) => {
+        
+       const id = localStorage.getItem('transID')
+       console.log(id + " ===== " + localStorage.getItem('doorID'))
         const options = {
             method: 'GET',
             headers: {
@@ -223,11 +258,12 @@ export const Body = () =>{
           };
           
           fetch('https://api.paymongo.com/v1/sources/'+id, options)
+         
             .then(response => response.json())
             .then(response => {
-
-                console.log(response)
-                const options = {
+                
+                
+                const options1 = {
                     method: 'POST',
                     headers: {
                       accept: 'application/json',
@@ -246,15 +282,16 @@ export const Body = () =>{
                     })
                   };
                   
-                  fetch('https://api.paymongo.com/v1/payments', options)
+                  fetch('https://api.paymongo.com/v1/payments', options1)
                     .then(response => response.json())
                     .then(response => {
                         const status = response.data.attributes.status 
                         if(status == 'paid'){
-                            const api = doorURL+doorID+'/open'
+                            
+                            const api = doorURL+localStorage.getItem('doorID')+'/open'
                             axios.get(api).then(res => {
                                
-                            axios.patch('http://localhost:3000/LockerDetails/'+doorID, {
+                            axios.patch('http://localhost:3000/LockerDetails/'+localStorage.getItem('doorID'), {
                                 doorStatus: 1,
                                 paymentStatus: 'paid',
                                 payType: process.env.REACT_APP_PAYTYPE,
@@ -266,20 +303,22 @@ export const Body = () =>{
                                 alias: alias
 
                             }).then(resp => {
-                                console.log(resp.data);
+                                cancelTransaction()
+                                localStorage.removeItem('transID') 
                                 fetchData()
                             }).catch(error => {
                                 console.log(error);
                             });
                                 
-                                cancelTransaction()
+                                
                                 
                             }).catch(err => { 
                                 console.log(err)
                             });
-                            localStorage.removeItem('transID') 
-                            clearInterval(dataInterval)
+                            
+                            //clearInterval(dataInterval)
                         }
+                        
                         
                     })
                     .catch(err => console.error(err));
@@ -291,7 +330,7 @@ export const Body = () =>{
 
     const reopenDoor = (pin,doorid) => {
        if(activeLottie == 1){
-            axios.get('http://localhost:3000/LockerDetails/?id='+doorID+'&&mpin='+pin).then(res => {
+            axios.get('http://localhost:3000/LockerDetails/?id='+localStorage.getItem('doorID')+'&&mpin='+pin).then(res => {
                 if(res.data.length == 1){
                     const api = doorURL+doorid+'/open'
                     axios.get(api).then(res => {
@@ -330,11 +369,11 @@ export const Body = () =>{
                     img_url: lockerFree
                 })
             })
-            axios.get('http://localhost:3000/LockerDetails/?id='+doorid+'&&mpin='+pin).then(res => {
+            axios.get('http://localhost:3000/LockerDetails/?id='+localStorage.getItem('doorID')+'&&mpin='+pin).then(res => {
                 if(res.data.length == 1){
-                    const api = doorURL+doorid+'/open'
+                    const api = doorURL+localStorage.getItem('doorID')+'/open'
                     axios.get(api).then(res => {
-                        axios.patch('http://localhost:3000/LockerDetails/'+doorid, {
+                        axios.patch('http://localhost:3000/LockerDetails/'+localStorage.getItem('doorID'), {
                             transID: "",
                             lockerLocation: process.env.REACT_APP_LOCKER_LOCATION,
                             doorSize: "S",
@@ -377,7 +416,6 @@ export const Body = () =>{
         const dataInterval = setInterval(()=> {
             checkDoors()
         },500)
-        
         return () => clearInterval(dataInterval)  
          
     },[])
@@ -440,7 +478,7 @@ export const Body = () =>{
                 {
                     (() => {
                         if(doorStatus == 0) {
-                            const status = <div className="txt-pin col-md-11 mx-auto mt-3 px-3 position-relative "><input type="text" autoComplete='off' placeholder='Set locker nickname' id="alias-text" maxLength={6} onChange={(e) => setAlias(e.target.value)}/></div>
+                            const status = <div className="txt-pin col-md-11 mx-auto mt-3 px-3 position-relative "><input type="text" autoComplete='off' placeholder='Set locker nickname' id="alias-text" maxLength={6} onChange={(e) => setAlias(e.target.value.toUpperCase().replace(/[^a-zA-Z0-9 ]/g, ''))}/></div>
                             return status
                         }  
                     })()  
@@ -461,7 +499,24 @@ export const Body = () =>{
                 <div className="modal-title pt-3">Door {doorID} </div>
                 <div className="modal-body modal-title mx-3 py-2">
                     <div className="text-center py-4">Scan to pay</div>
-                    <div className="qr-border d-flex justify-content-center align-items-center mx-auto hidden" id="qr"><QRCode value={checkoutURL}/></div> 
+
+                    
+
+                    <div className="qr-border d-flex justify-content-center align-items-center mx-auto hidden" id="qr">
+                    {/* <QRCode value={checkoutURL}/> */ }
+                        {
+                            (() => {
+                                if(urlSet == ""){
+                                    const loading = <Player src={loader} loop autoplay />
+                                    return loading
+                                }
+                                else {
+                                    const loading = <QRCode value={checkoutURL}/>
+                                    return loading
+                                }   
+                            })()  
+                        } 
+                    </div>  
                     <div className="text-center py-4">{process.env.REACT_APP_LOCKER_PRICE}</div>
                     <div className="text-center">Whole day or until final checkout</div>
                     <div className="text-center lottie"> <Player src={loader} loop autoplay /> </div>
@@ -471,6 +526,13 @@ export const Body = () =>{
 
               
             </div>
+
+
+
+
+
+
+            
             {
                     (() => {
                         if(doorStatus == 0) {

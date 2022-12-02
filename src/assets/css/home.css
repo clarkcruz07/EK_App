@@ -137,6 +137,7 @@ canvas{
     z-index: 9999999;
     top: 0;
     left: 0;
+    width: 100%;
 }
 .btn-success, .btn-danger {
     height: 5rem !important;
@@ -148,6 +149,7 @@ canvas{
     position: absolute;
     top: 0;
     left: 0;
+    width: 100%;
 }
 .modal.second.occupied {
     position: absolute;

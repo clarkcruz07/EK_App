@@ -146,6 +146,6 @@ input[type="text"] {
     outline: 0;
     border: 0;
     height: 95%;
-
+    text-transform: uppercase;
 }
 /* */
