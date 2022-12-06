@@ -134,9 +134,10 @@ export const Body = () =>{
                 
             }
             else {
-                postPayment(pin,doorNumber)
+                
                 setModal('')
                 setNewModal('hidden')
+                postPayment(pin,doorNumber)
             }
         })
             
@@ -164,15 +165,21 @@ export const Body = () =>{
         setActive('')
         setAlias('')
         setPin('')
-        setcheckoutURL(null)
+        setcheckoutURL('')
         localStorage.removeItem('transID')
+        localStorage.removeItem('doorID')
         document.getElementById('alias-text').value = ""
-        clearInterval(dataInterval)
+        
      
     }
+    function keyDown(e) { 
+        var x = document.getElementById("alias-text").value;
+        document.getElementById("alias-text").value=x.replace(/[^a-zA-Z0-9]/g, "");
+
+    }
     const postPayment = (pin,door_number) => {
-        
-        localStorage.removeItem('transID')
+        setURL('')
+        //localStorage.removeItem('transID')
                 const options = {
                     method: 'POST',
                     headers: {
@@ -197,15 +204,11 @@ export const Body = () =>{
                   
                   fetch('https://api.paymongo.com/v1/sources', options)
                     .then(response => response.json())
-                    .then(response => {         
-                           
-                        //console.log(response.data.id);
-                       
+                    .then(response => {  
                         setLoader(dataLoading)
-                        
-                        
-                        
-                        //console.log(pin)
+
+                         /*
+                        setLoader(dataLoading)
                         dataInterval = setInterval(()=> {
                             
                             if(response.data.id == undefined || response.data.id == null){
@@ -223,16 +226,22 @@ export const Body = () =>{
                         },1000)
                         setcheckoutURL(response.data.attributes.redirect.checkout_url)
                         localStorage.setItem('transID', response.data.id)
+                        console.log(response.data.id)
                         return () => clearInterval(dataInterval) 
+                        */
                         
-                        //
+                        dataInterval = setInterval(()=> {
+                            fetchPaymentStatus(
+                                pin,door_number,
+                                response.data.id, 
+                                response.data.attributes.redirect.checkout_url
+                                )
+                        },1000)
                        
-                        
-                        
-                        
-                        //console.log(timerData)
-                        //
-        
+                        setcheckoutURL(response.data.attributes.redirect.checkout_url)
+                        setURL('1')
+                        document.getElementById('qr').classList.remove('hidden')
+                         return () => clearInterval(dataInterval) 
         
                     })
                     .catch((err)=> {
@@ -245,10 +254,8 @@ export const Body = () =>{
 
     }
 
-    const fetchPaymentStatus = (pin,door_number) => {
-        
-       const id = localStorage.getItem('transID')
-       console.log(id + " ===== " + localStorage.getItem('doorID'))
+    const fetchPaymentStatus = (pin,door_number,transactionID, checkoutUrl) => {
+
         const options = {
             method: 'GET',
             headers: {
@@ -257,7 +264,7 @@ export const Body = () =>{
             }
           };
           
-          fetch('https://api.paymongo.com/v1/sources/'+id, options)
+          fetch('https://api.paymongo.com/v1/sources/'+transactionID, options)
          
             .then(response => response.json())
             .then(response => {
@@ -275,7 +282,7 @@ export const Body = () =>{
                         attributes: {
                           amount: 25000,
                           description: "Payment for Locker Location " + process.env.REACT_APP_LOCKER_LOCATION + ", with mpin # " + pin,
-                          source: {type: 'source', id: localStorage.getItem('transID')},
+                          source: {type: 'source', id: transactionID},
                           currency: 'PHP',
                         }
                       }
@@ -286,17 +293,19 @@ export const Body = () =>{
                     .then(response => response.json())
                     .then(response => {
                         const status = response.data.attributes.status 
+                        
                         if(status == 'paid'){
+                            console.log(checkoutUrl + ' - ' + door_number + ' - ' + pin)
                             
-                            const api = doorURL+localStorage.getItem('doorID')+'/open'
+                            const api = doorURL+door_number+'/open'
                             axios.get(api).then(res => {
                                
-                            axios.patch('http://localhost:3000/LockerDetails/'+localStorage.getItem('doorID'), {
+                            axios.patch('http://localhost:3000/LockerDetails/'+door_number, {
                                 doorStatus: 1,
                                 paymentStatus: 'paid',
                                 payType: process.env.REACT_APP_PAYTYPE,
                                 doorOpenCount: 1,
-                                mpin: cart,
+                                mpin: pin,
                                 timeIn: new Date().toLocaleString(),
                                 timeOut: '',
                                 img_url: lockerOccupied,
@@ -304,7 +313,6 @@ export const Body = () =>{
 
                             }).then(resp => {
                                 cancelTransaction()
-                                localStorage.removeItem('transID') 
                                 fetchData()
                             }).catch(error => {
                                 console.log(error);
@@ -315,8 +323,6 @@ export const Body = () =>{
                             }).catch(err => { 
                                 console.log(err)
                             });
-                            
-                            //clearInterval(dataInterval)
                         }
                         
                         
@@ -330,7 +336,7 @@ export const Body = () =>{
 
     const reopenDoor = (pin,doorid) => {
        if(activeLottie == 1){
-            axios.get('http://localhost:3000/LockerDetails/?id='+localStorage.getItem('doorID')+'&&mpin='+pin).then(res => {
+            axios.get('http://localhost:3000/LockerDetails/?id='+doorid+'&&mpin='+pin).then(res => {
                 if(res.data.length == 1){
                     const api = doorURL+doorid+'/open'
                     axios.get(api).then(res => {
@@ -369,11 +375,13 @@ export const Body = () =>{
                     img_url: lockerFree
                 })
             })
-            axios.get('http://localhost:3000/LockerDetails/?id='+localStorage.getItem('doorID')+'&&mpin='+pin).then(res => {
-                if(res.data.length == 1){
-                    const api = doorURL+localStorage.getItem('doorID')+'/open'
+            axios.get('http://localhost:3000/LockerDetails/?id='+doorid+'&&mpin='+pin).then(res => {
+               
+            if(res.data.length == 1){
+                    const api = doorURL+doorid+'/open'
+                    
                     axios.get(api).then(res => {
-                        axios.patch('http://localhost:3000/LockerDetails/'+localStorage.getItem('doorID'), {
+                        axios.patch('http://localhost:3000/LockerDetails/'+doorid, {
                             transID: "",
                             lockerLocation: process.env.REACT_APP_LOCKER_LOCATION,
                             doorSize: "S",
@@ -389,15 +397,19 @@ export const Body = () =>{
                             alias: ""
 
                         }).then(resp => {
-                            console.log(resp.data);
+                             //console.log('http://localhost:3000/LockerDetails/'+localStorage.getItem('doorID'))
+                            //console.log(resp.data);
+                            //console.log('http://localhost:3000/LockerDetails/'+localStorage.getItem('doorID'))
+                            
                             fetchData()
+                            cancelTransaction()
                         }).catch(error => {
                             console.log(error);
                         });
                     }).catch(err => { 
                         console.log(err)
                     });
-                    cancelTransaction()
+                    
                 }
                 else {
                     setErrorStatus('Wrong Mpin, cannot open door!')
@@ -478,7 +490,7 @@ export const Body = () =>{
                 {
                     (() => {
                         if(doorStatus == 0) {
-                            const status = <div className="txt-pin col-md-11 mx-auto mt-3 px-3 position-relative "><input type="text" autoComplete='off' placeholder='Set locker nickname' id="alias-text" maxLength={6} onChange={(e) => setAlias(e.target.value.toUpperCase().replace(/[^a-zA-Z0-9 ]/g, ''))}/></div>
+                            const status = <div className="txt-pin col-md-11 mx-auto mt-3 px-3 position-relative "><input type="text" autoComplete='off' placeholder='Set locker nickname' id="alias-text" maxLength={6} onChange={(e) => setAlias(e.target.value.toUpperCase())} onKeyDown={keyDown}/></div>
                             return status
                         }  
                     })()  
