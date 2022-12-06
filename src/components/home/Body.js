@@ -490,7 +490,8 @@ export const Body = () =>{
                 {
                     (() => {
                         if(doorStatus == 0) {
-                            const status = <div className="txt-pin col-md-11 mx-auto mt-3 px-3 position-relative "><input type="text" autoComplete='off' placeholder='Set locker nickname' id="alias-text" maxLength={6} onChange={(e) => setAlias(e.target.value.toUpperCase())} onKeyDown={keyDown}/></div>
+                            const status = <div className="txt-pin col-md-11 mx-auto mt-3 px-3 position-relative "><input type="text" autoComplete='off' placeholder='Set locker nickname' id="alias-text" maxLength={6} onChange={(e) => setAlias(e.target.value.toUpperCase())} onKeyDown={keyDown}/>
+                            </div>
                             return status
                         }  
                     })()  
