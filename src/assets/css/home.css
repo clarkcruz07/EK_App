@@ -42,6 +42,13 @@ input[type="radio"] {
     top: 65%;
     left: 5rem;
 }
+
+.modal.second.admin
+.modal-button {
+    position: absolute;
+    top: 65%;
+    left: 5rem;
+}
 .lottie-wrapper {
     bottom: 13rem;
     width: 426px;
@@ -165,7 +172,39 @@ canvas{
     margin-top: 14rem;
     margin-left: 0;
 }
-
+.modal.second.admin {
+    position: absolute;
+    height: 590px !important;
+    width: 510px !important;
+    margin-top: 10rem;
+    margin-left: 0;
+}
 .clear{
     height: 70px !important;
+}
+
+.tab-wrapper{
+    width: 95.5% !important;
+}
+
+.tab-title {
+    opacity: 0.5;
+}
+.tab-title.active {
+    opacity: 1;
+}
+
+.tab-content{
+    text-align: center;
+}
+
+.wrapper .tab-content , .textbox-admin{
+    width: 100% !important;
+}
+
+.textbox-admin input[type="text"]{
+    width: 90% !important;
+    border: 2px solid #3d3d3d !important;
+    height: 3rem;
+    text-indent: 1rem;
 }

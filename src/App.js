@@ -7,6 +7,7 @@ import React from 'react'
 import {BrowserRouter as Router, Routes, Route} from 'react-router-dom'
 
 import Home from './components/home/Home'
+import Admin from './components/admin/Home'
 function App() {
   //window. oncontextmenu = function(event) { event. preventDefault(); event. stopPropagation(); return false; };
   return (
@@ -16,6 +17,10 @@ function App() {
               <Route
                 path="/"
                 element={ <Home /> }
+              /> 
+                <Route
+                path="/admin"
+                element={ <Admin /> }
               /> 
           </Routes>
         </Router>

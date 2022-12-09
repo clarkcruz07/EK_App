@@ -10,7 +10,10 @@ import gohome from '../../assets/json/goHomeLottie.json'
 import reopen from '../../assets/json/lockDoorLottie.json'
 import QRCode from "qrcode.react";
 
-export const Body = () =>{
+import { useNavigate } from 'react-router-dom'
+
+export const Body = ({setPopup}) =>{
+    const navigate = useNavigate()
     const [listDoors, fetchDoors] = useState([])
     const [doorID, setDoorID] = useState(0)
     const [overlay, setOverlay] = useState('')
@@ -95,7 +98,8 @@ export const Body = () =>{
             fetchDoors(res.data)
         })
     }
-    const postData = (key,status) => {
+    const postData = (key,status, timein) => {
+        console.log(timein)
         setOverlay('hidden')
         setModal('hidden')
         
@@ -165,10 +169,15 @@ export const Body = () =>{
         setActive('')
         setAlias('')
         setPin('')
+        setShowText('')
         setcheckoutURL('')
         localStorage.removeItem('transID')
         localStorage.removeItem('doorID')
-        document.getElementById('alias-text').value = ""
+        if(localStorage.getItem('modalCheck') != 1){
+            document.getElementById('alias-text').value = ""
+        }
+        
+        localStorage.removeItem('modalCheck')
         
      
     }
@@ -207,29 +216,6 @@ export const Body = () =>{
                     .then(response => {  
                         setLoader(dataLoading)
 
-                         /*
-                        setLoader(dataLoading)
-                        dataInterval = setInterval(()=> {
-                            
-                            if(response.data.id == undefined || response.data.id == null){
-                                console.log('undefined')
-                            }
-                            if(response.data.id.length != '') {
-                                fetchPaymentStatus(pin,door_number)
-                                setURL('1')
-                                document.getElementById('qr').classList.remove('hidden')                     
-                            } 
-                            else {
-                                setURL('0')
-                            }
-                           
-                        },1000)
-                        setcheckoutURL(response.data.attributes.redirect.checkout_url)
-                        localStorage.setItem('transID', response.data.id)
-                        console.log(response.data.id)
-                        return () => clearInterval(dataInterval) 
-                        */
-                        
                         dataInterval = setInterval(()=> {
                             fetchPaymentStatus(
                                 pin,door_number,
@@ -335,6 +321,7 @@ export const Body = () =>{
     }
 
     const reopenDoor = (pin,doorid) => {
+        console.log(alias)
        if(activeLottie == 1){
             axios.get('http://localhost:3000/LockerDetails/?id='+doorid+'&&mpin='+pin).then(res => {
                 if(res.data.length == 1){
@@ -371,6 +358,7 @@ export const Body = () =>{
                     amount: process.env.REACT_APP_LOCKER_PRICE,
                     doorOpenCount: 1,
                     mpin: pin,
+                    alias: alias,
                     timeOut: new Date().toLocaleString(),
                     img_url: lockerFree
                 })
@@ -397,10 +385,7 @@ export const Body = () =>{
                             alias: ""
 
                         }).then(resp => {
-                             //console.log('http://localhost:3000/LockerDetails/'+localStorage.getItem('doorID'))
-                            //console.log(resp.data);
-                            //console.log('http://localhost:3000/LockerDetails/'+localStorage.getItem('doorID'))
-                            
+                                                        
                             fetchData()
                             cancelTransaction()
                         }).catch(error => {
@@ -423,14 +408,28 @@ export const Body = () =>{
             
         /**/
     }
+
+    const loginAdmin = () => {
+        if(cart == process.env.REACT_APP_STAFF_PIN){
+           window.location.href="/admin"
+        }
+        else{
+            setErrorStatus('not matched')
+        }
+    }
     useEffect(() => {
         fetchData()  
         const dataInterval = setInterval(()=> {
             checkDoors()
         },500)
+
+       setPopup(modalPopup)
+       localStorage.removeItem('modalCheck')
         return () => clearInterval(dataInterval)  
          
     },[])
+    const modalPopup = 1
+    const numberorder = useRef(null);
     useEffect((e) => {
        if(doorStatus == 0){
             if(cart.length < 4 || alias.length == 0){
@@ -453,16 +452,30 @@ export const Body = () =>{
        }
 
 
-        if(cart.length > 5 ){
+        if(cart.length > 5 && localStorage.getItem('modalCheck') != 1 ){
             setDisable(true)
             setPoint('pointer')
+        }
+        else if(cart.length > 15 && localStorage.getItem('modalCheck') == 1 ){
+            setDisable(true)
+            setPoint('pointer')
+            setPointNewPin('')
+            setDisableNewPin(false)
         }
         else{
             setDisable(false)
             setPoint('')
         }
        
-      
+        if(localStorage.getItem('modalCheck') == 1){
+            
+            setModal('hidden')
+            setOverlay('hidden')
+            if (numberorder.current) {
+                numberorder.current.focus();
+              }
+        }
+        
         
     })
 
@@ -472,24 +485,53 @@ export const Body = () =>{
              
             <div className={overlay ? 'overlay' : 'overlay hidden'}></div>
             <div className={modal ? 'modal' : 'modal hidden'}>
-                <div className="modal-title pt-3 color-green">Set pin for door #{doorID} </div>
-                <div className="modal-body modal-title mx-3 py-2">Status: 
+                
+                
                 {
                     (() => {
-                        if(doorStatus == 0) {
+                        if(localStorage.getItem('modalCheck') != 1) {
+                            const status = <div className="modal-title pt-3 color-green">Set pin for door #{doorID} </div>
+                            return status
+                        }
+                        else{
+                            const status = <div className="modal-title pt-3 color-green">Admin Tool</div>
+                            return status
+                        }
+                    })()  
+                } 
+
+                
+                
+                <div className="modal-body modal-title mx-3 py-2">
+                {
+                    (() => {
+                        if(localStorage.getItem('modalCheck') != 1) {
+                            const status = <span>Status: </span>
+                            return status
+                        }  
+                    })()  
+                } 
+                
+                {
+                    (() => {
+                        if(doorStatus == 0 && localStorage.getItem('modalCheck') != 1) {
                             const status = <span className="door-status color-green"> Free</span>
                             return status
                         }
-                        else if(doorStatus == 1){
+                        else if(doorStatus == 1 && localStorage.getItem('modalCheck') != 1){
                             const status = <span className="door-status color-red"> Occupied</span>
                             return status
-                        }   
+                        }  
+                        else{
+                            const status = <span className="door-status color-green"></span>
+                            return status
+                        } 
                     })()  
                 }  
 
                 {
                     (() => {
-                        if(doorStatus == 0) {
+                        if(doorStatus == 0 && localStorage.getItem('modalCheck') != 1) {
                             const status = <div className="txt-pin col-md-11 mx-auto mt-3 px-3 position-relative "><input type="text" autoComplete='off' placeholder='Set locker nickname' id="alias-text" maxLength={6} onChange={(e) => setAlias(e.target.value.toUpperCase())} onKeyDown={keyDown}/>
                             </div>
                             return status
@@ -498,8 +540,10 @@ export const Body = () =>{
                 }  
 
                     
-                    <div className={showPin  ? 'txt-pin col-md-11 mx-auto mt-3 px-3 position-relative ' : 'txt-pin col-md-11 mx-auto mt-3 px-3 position-relative password'} id="number-input" onChange={saveInput}>{cart}
-                    <div className="eye-icon" id="eye-icon" onClick={showText}><img src={eyeIcon} /></div>  
+                    <div className={showPin  ? 'txt-pin col-md-11 mx-auto mt-3 px-3 position-relative ' : 'txt-pin col-md-11 mx-auto mt-3 px-3 position-relative password'} id="number-input" onChange={saveInput} >{cart}
+                  
+                        <div className="eye-icon" id="eye-icon" onClick={showText}><img src={eyeIcon} /></div> 
+                    
                     </div>  
                     <div className="px-3"><h6 className="color-red">{errorStatus}</h6></div>
                     
@@ -548,7 +592,7 @@ export const Body = () =>{
             
             {
                     (() => {
-                        if(doorStatus == 0) {
+                        if(doorStatus == 0 && localStorage.getItem('modalCheck') != 1) {
                             const status = 
                             <div className={modal ? 'modal second free' : 'modal hidden second free'} id="modal-second">
                             <div className="py-2">Tap to set pin</div>
@@ -565,7 +609,7 @@ export const Body = () =>{
                                 
                                 <div onClick={() => handleClick(0)} disabled={disable} id="btn-number" className={point ? 'pointer' : ''}>0</div>
                                 <div onClick={()=>clearAll()} className="btn btn-danger mx-2 clear d-flex justify-content-center align-items-center">Clear pin</div>
-                                <input type="hidden" value={cart} id="hidden-text" onChange={(e) => setPin(e.target.value)}/>
+                                <input type="hidden" value={cart} id="hidden-text" onChange={(e) => setPin(e.target.value)} ref={numberorder}/>
                                
                                 <div className="modal-button">
                                <div className="my-2"><button disabled={disableNewPin} className={pointNewPin ? 'my-2 pointer btn btn-success' : 'my-2 btn btn-success'} onClick={() => postPin(cart,doorID)}>Set pin</button></div>
@@ -579,7 +623,7 @@ export const Body = () =>{
                         </div>
                             return status
                         }
-                        else if(doorStatus == 1){
+                        else if(doorStatus == 1 && localStorage.getItem('modalCheck') != 1){
                             const status = 
                             <div className={modal ? 'modal second occupied' : 'modal hidden second occupied'} id="modal-second">
                             <div className="py-2">Tap to set pin</div>
@@ -626,6 +670,39 @@ export const Body = () =>{
                         </div>
                             return status
                         }   
+
+                        else{
+                            const status = 
+                            <div className={modal ? 'modal second admin' : 'modal hidden second admin'} id="modal-second">
+                            <div className="py-2">Tap to set pin</div>
+                            <div className="modal-number-section d-flex justify-content-start align-items-center flex-wrap">
+                                <div onClick={() => handleClick(1)} disabled={disable} id="btn-number" className={point ? 'pointer' : ''}>1</div>
+                                <div onClick={() => handleClick(2)} disabled={disable} id="btn-number" className={point ? 'pointer' : ''}>2</div>
+                                <div onClick={() => handleClick(3)} disabled={disable} id="btn-number" className={point ? 'pointer' : ''}>3</div>
+                                <div onClick={() => handleClick(4)} disabled={disable} id="btn-number" className={point ? 'pointer' : ''}>4</div>
+                                <div onClick={() => handleClick(5)} disabled={disable} id="btn-number" className={point ? 'pointer' : ''}>5</div>
+                                <div onClick={() => handleClick(6)} disabled={disable} id="btn-number" className={point ? 'pointer' : ''}>6</div>
+                                <div onClick={() => handleClick(7)} disabled={disable} id="btn-number" className={point ? 'pointer' : ''}>7</div>
+                                <div onClick={() => handleClick(8)} disabled={disable} id="btn-number" className={point ? 'pointer' : ''}>8</div>
+                                <div onClick={() => handleClick(9)} disabled={disable} id="btn-number" className={point ? 'pointer' : ''}>9</div>
+                                
+                                <div onClick={() => handleClick(0)} disabled={disable} id="btn-number" className={point ? 'pointer' : ''}>0</div>
+                                <div onClick={()=>clearAll()} className="btn btn-danger mx-2 clear d-flex justify-content-center align-items-center">Clear pin</div>
+                                <input type="hidden" value={cart} id="hidden-text" onChange={(e) => setPin(e.target.value)}/>
+                               
+                                
+                                <div className="modal-button">
+                                <div className="my-2"><button disabled={disableNewPin} className={pointNewPin ? 'my-2 pointer btn btn-success' : 'my-2 btn btn-success'} onClick={() => loginAdmin(cart)}>Login as admin</button></div>
+                                    
+                                    <div className="my-2"><button onClick={cancelTransaction} className="btn btn-default text-dark">Close Window</button></div>
+                                    {/* <div className="sync-data position-absolute"><button className=" btn btn-danger"> Sync Data</button></div> */ }              
+                                </div>
+                            </div>
+                                
+                            
+                        </div>
+                            return status
+                        }
                     })()  
                 }  
             
@@ -641,7 +718,7 @@ export const Body = () =>{
                         {
                             
                             if(item.doorStatus == 1){
-                                const doorStats = <div key={item.id} className="col-door col-md-2 d-flex justify-content-center align-items-center px-2 py-2" onClick={() => postData(item.id, item.doorStatus)}>
+                                const doorStats = <div key={item.id} className="col-door col-md-2 d-flex justify-content-center align-items-center px-2 py-2" onClick={() => postData(item.id, item.doorStatus,item.timeIn)}>
                                      
                                 <h2 className="position-absolute color-white">
                                 {item.lockerLocation}{item.id}               

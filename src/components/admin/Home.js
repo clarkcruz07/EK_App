@@ -1,17 +1,27 @@
 import React,{useEffect, useState,useRef} from 'react'
-import Header from './Header'
-import Body from './Body'
-import Footer from './Footer'
+
 import { Player } from '@lottiefiles/react-lottie-player';
 import loader from '../../assets/json/ekIdle.json'
 import BG from '../../assets/json/ekBG.json'
 import {Link} from 'react-router-dom'
-import useAutoLogout from "./IdleTimeout";
+import useAutoLogout from "../home/IdleTimeout";
+import Tabs from './Tabs'
+import { useNavigate } from 'react-router-dom';
 export const Home = () =>{
     const videoBg = './assets/gradientBG.mp4'
+    const navigate = useNavigate()
     let timer = useAutoLogout(100);
 
-    const [popup, setPopup] = useState('')
+    const exitAdmin = () => {
+        localStorage.removeItem('modalCheck')
+        navigate('/')
+    }
+   useEffect(() => {
+    if(localStorage.getItem('modalCheck') == '' || localStorage.getItem('modalCheck') == null)
+    {
+        navigate('/')
+    }
+   })
 
     //const [loading, setLoader] = useState(loader)
     if(timer == 0){
@@ -22,7 +32,11 @@ export const Home = () =>{
     }
     return (
         <div className="container">
+            <div className="row">
+                <div className="d-flex justify-content-end align-items-center position-relative z-index col-md-12 py-5"><button className="btn btn-danger mx-2" onClick={() => exitAdmin()}>Exit admin tool</button></div>
+            </div>
             
+            <Tabs />
             <div className="home hidden" id="lottie-player" onClick={lottieEnd}>
             <Player 
                 src={loader}
@@ -31,7 +45,7 @@ export const Home = () =>{
             />
             </div>
            
-            <Link to="/">
+            <Link to="/admin">
                 <div className="bg">
                     <Player 
                     src={BG}
@@ -40,10 +54,8 @@ export const Home = () =>{
                      />
                 </div>
             
-            <Header /> 
-            <Body setPopup={setPopup}/>
-            <Footer popup={popup}/>   
-            </Link>    
+            </Link> 
+            
         </div>
     )
 }
