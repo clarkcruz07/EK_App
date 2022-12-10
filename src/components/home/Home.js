@@ -9,7 +9,7 @@ import {Link} from 'react-router-dom'
 import useAutoLogout from "./IdleTimeout";
 export const Home = () =>{
     const videoBg = './assets/gradientBG.mp4'
-    let timer = useAutoLogout(100);
+    let timer = useAutoLogout(30);
 
     const [popup, setPopup] = useState('')
 

@@ -208,3 +208,11 @@ canvas{
     height: 3rem;
     text-indent: 1rem;
 }
+
+.table button:active {
+    background-color: #000 !important;
+}
+
+.end-session {
+    float: right;
+}

@@ -98,13 +98,15 @@ export const Body = ({setPopup}) =>{
             fetchDoors(res.data)
         })
     }
-    const postData = (key,status, timein) => {
-        console.log(timein)
+    const postData = (key,status, timein, aliasData) => {
+        
         setOverlay('hidden')
         setModal('hidden')
         
         setDoorID(key)
         localStorage.setItem('doorID',key)
+        localStorage.setItem('timein',timein)
+        localStorage.setItem('alias',aliasData)
         setDoorStatus(status)
     }
     const showText = () => {
@@ -173,6 +175,8 @@ export const Body = ({setPopup}) =>{
         setcheckoutURL('')
         localStorage.removeItem('transID')
         localStorage.removeItem('doorID')
+        localStorage.removeItem('timein')
+        localStorage.removeItem('alias')
         if(localStorage.getItem('modalCheck') != 1){
             document.getElementById('alias-text').value = ""
         }
@@ -358,7 +362,8 @@ export const Body = ({setPopup}) =>{
                     amount: process.env.REACT_APP_LOCKER_PRICE,
                     doorOpenCount: 1,
                     mpin: pin,
-                    alias: alias,
+                    alias: localStorage.getItem('alias'),
+                    timeIn: localStorage.getItem('timein'),
                     timeOut: new Date().toLocaleString(),
                     img_url: lockerFree
                 })
@@ -718,7 +723,7 @@ export const Body = ({setPopup}) =>{
                         {
                             
                             if(item.doorStatus == 1){
-                                const doorStats = <div key={item.id} className="col-door col-md-2 d-flex justify-content-center align-items-center px-2 py-2" onClick={() => postData(item.id, item.doorStatus,item.timeIn)}>
+                                const doorStats = <div key={item.id} className="col-door col-md-2 d-flex justify-content-center align-items-center px-2 py-2" onClick={() => postData(item.id, item.doorStatus,item.timeIn, item.alias)}>
                                      
                                 <h2 className="position-absolute color-white">
                                 {item.lockerLocation}{item.id}               

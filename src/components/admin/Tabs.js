@@ -1,7 +1,10 @@
 import React,{useEffect,useState, useRef} from 'react'
 import axios from 'axios'
 
+import lockerOccupied from '../../assets/img/lockerOccupied.svg'
 import eyeIcon from '../../assets/img/eyeIcon.svg'
+
+import swal from 'sweetalert2'
 export const Tabs = () =>{
     const [index,setIndex] = useState(1)
 
@@ -25,9 +28,11 @@ export const Tabs = () =>{
 
     const [postNewpin, setPin] = useState('')
     const [doorID, setDoorID] = useState(0)
-    
+
+    const [doors, setDoors] = useState([])
     const numberorder = useRef(null);
     const APIurl = 'http://localhost:3000/LockerDetails'
+    const doorURL = 'http://localhost:9090/api/lockercontroller/door/'
     const toggleTab = (indexTab) => {
         setIndex(indexTab)
     }
@@ -42,7 +47,7 @@ export const Tabs = () =>{
         })
     }
 
-    const fetchForgotPin = () => {
+    const fetchOpenDoors = () => {
         axios.get(APIurl + '/?doorStatus=1').then((res) => {
             //console.log(res.data)
             setPinData(res.data)
@@ -51,6 +56,8 @@ export const Tabs = () =>{
 
         })
     }
+
+
 
     const popup = (doorID) => {
         setOverlay('hidden')
@@ -102,7 +109,175 @@ export const Tabs = () =>{
         });
             
     }
+
+    const rebookData = (doorid,timeout) => {
+        /*const api = doorURL+doorid+'/open'
+        axios.get(api).then(res => {
+
+        }).catch(err => { 
+            console.log(err)
+        });*/
+                axios.get('http://localhost:3000/LockerDetails/'+doorid).then((res) => {
+                
+                if(res.data.timeIn){
+                    swal.fire({
+                        position: 'center',
+                        icon: 'warning',
+                        title: 'DI KA NAGBABASA TAPOS MAGREREBOOK KA!',
+                        showConfirmButton: false,
+                        timer: 3000
+                      })
+                }
+                else{
+                    const api = doorURL+doorid+'/open'
+                    axios.get(api).then(res => {
+                        
+                        axios.get('http://localhost:3000/LocalData/?transID='+doorid).then(res => {
+                            
+                            const door_id = res.data[0].transID
+                            const time_in = res.data[0].timeIn
+                            const mpin = res.data[0].mpin
+                            const __alias = res.data[0].alias
+
+                            axios.patch('http://localhost:3000/LockerDetails/'+door_id, {
+                            transID: "",
+                            lockerLocation: process.env.REACT_APP_LOCKER_LOCATION,
+                            doorSize: "S",
+                            doorStatus: 1,
+                            paymentStatus: "paid",
+                            payType: process.env.REACT_APP_PAYTYPE,
+                            amount: process.env.REACT_APP_LOCKER_PRICE,
+                            doorOpenCount: 1,
+                            mpin: mpin,
+                            alias: __alias,
+                            timeIn: time_in,
+                            timeOut: "",
+                            img_url: lockerOccupied,
+                            id: door_id
+
+                            }).then(resp => {
+
+                                axios.get('http://localhost:3000/LocalData/?transID='+door_id+"&&timeOut="+timeout).then(resp => {
+                                    const id = resp.data[0].id
+
+                                    axios.delete('http://localhost:3000/LocalData/' + id).then(response => {
+                                        console.log('deleted....')
+                                    })
+
+                                    swal.fire({
+                                        position: 'center',
+                                        icon: 'success',
+                                        title: 'Door is rebooked',
+                                        showConfirmButton: false,
+                                        timer: 3000
+                                      })
+                                }).catch(error => {
+                                    console.log(error);
+                                });
+
+                            }).catch(error => {
+                                console.log(error);
+                            });
+
+                        })
+                        
+                    }).catch(err => { 
+                        console.log(err)
+                    });
+                }
+               
+                
+                   /* */
+            })
+            .catch((err) => {
+                console.log(err)
+            })
+                
+                
+            
+
+
+            
+    }
+
+    const searchData = (data) => {
+        console.log(data)
+        axios.get('http://localhost:3000/LockerDetails/'+data).then(resp => {
+           console.log(resp.data)
+        }).catch(error => {
+            console.log(error);
+        });
+        
+    }
+
+    const getCheckedValues = () => {
+        return Array.from(document.getElementsByName('chk'))
+        .filter((checkbox) => checkbox.checked)
+        .map((checkbox) => checkbox.value);
+      }
+      
+     const check = (source) => {
+            const checkboxes = document.querySelectorAll('input[type=checkbox]');
+            if(document.getElementById('select-all').checked == true){
+                checkboxes.forEach((cb) => 
+                {                 
+                    cb.checked = true; 
+                })
+            }
+           else{
+                checkboxes.forEach((cb) => 
+                {                 
+                    cb.checked = false; 
+                })
+           }
+
+            /*const uncheckboxes = document.querySelectorAll('input[type=checkbox]:checked');
+            uncheckboxes.forEach((cb) => 
+            {                 
+                cb.checked = false; 
+            });*/
+          
+
+        const resultEl = document.getElementsByName('chk');
+        resultEl.value = getCheckedValues();
+        setDoors(getCheckedValues())
+        
+     } 
+
+     
+
+    const endSession = () => {
+        let newarr = []
+        axios.get(APIurl).then((res) => {
+            //console.log(res.data)
+                axios
+                .get('http://localhost:9090/api/lockercontroller/doors')
+                .then((response) => {
+                newarr = response.data.data.doors
+                    {Object.keys(response.data.data.doors).map((key) => {
+                        const api = doorURL+key+'/open'
+                        axios.get(api).then(respo => {
+                            
+                       })
+                    })}
+                    
+                })
+                .catch((err) => {
+                    console.log(err)
+                })
+        })
+      
+       
+        
+            
+        
+    }
+    
     useEffect(() => {
+        
+    },[])
+    useEffect(() => {
+        
         if(index == 1){
             document.getElementById('forgot').classList.remove('active')
             document.getElementById('session').classList.remove('active')
@@ -115,13 +290,14 @@ export const Tabs = () =>{
             document.getElementById('session').classList.remove('active')
             document.getElementById('sync').classList.remove('active')
             document.getElementById('rebook').classList.remove('active')
-            fetchForgotPin()
+            fetchOpenDoors()
         }
         else if(index == 3){
             document.getElementById('forgot').classList.remove('active')
             document.getElementById('session').classList.add('active')
             document.getElementById('sync').classList.remove('active')
             document.getElementById('rebook').classList.remove('active')
+            fetchOpenDoors()
         }
         else if(index == 4){
             document.getElementById('forgot').classList.remove('active')
@@ -147,9 +323,9 @@ export const Tabs = () =>{
             setPointNewPin('')
             setDisableNewPin(false)
         }
-
         
     })
+
 
     return (
         <div className="row">
@@ -220,26 +396,44 @@ export const Tabs = () =>{
                                     Rebook door
 
                                     <div className="textbox-admin py-4"><input type="text" className="rounded" maxLength="16" placeholder='Search alias or door number' /></div>
-                                    {
+                                    
+                                    <table className="table mx-auto">
+                                        <thead>
+                                        <tr>
+                                            <th>Door number</th>
+                                            <th>Alias</th>
+                                            <th>Time Out</th>
+                                            <th>&nbsp;</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {
                                     rebookDoor
                                         .map(
                                             item => 
                                             {
                                                 
-                                                const doorStats = <div key={item.id}>{item.id} , {item.alias}</div>
+                                                const doorStats = <tr key={item.id}>
+                                                    <td className="col-md-4">{item.transID}</td>
+                                                    <td className="col-md-4">{item.alias}</td>
+                                                    <td className="col-md-4">{item.timeOut}</td>
+                                                    <td className="col-md-4"><button className="btn btn-danger" onClick={() => rebookData(item.transID, item.timeOut)}>Rebook</button></td>
+                                                </tr>
                                                 return doorStats
-                                                
                                             }
                                         )
                                         
                                     }
+                                        </tbody>
+                                    </table>
+                                    
                                 </div>
                             return status
                         } 
                         if(index == 2) {
                             const status = <div className="tab-content py-3 mx-auto">
                                     Forgot Pin
-                                    <div className="textbox-admin py-4"><input type="text" className="rounded" maxLength="16" placeholder='Search alias or door number'/></div>
+                                    <div className="textbox-admin py-4"><input type="text" className="rounded" maxLength="16" placeholder='Search alias or door number' onChange={(e) => searchData(e.target.value)}/></div>
                                     <table className="table mx-auto">
                                         <thead>
                                         <tr>
@@ -275,6 +469,55 @@ export const Tabs = () =>{
                             const status = <div className="tab-content py-3 mx-auto">
                                     Sessions
                                     <div className="textbox-admin py-4"><input type="text" className="rounded" maxLength="16" placeholder='Search alias or door number' /></div>
+                                    <button className="btn btn-danger end-session mx-5" onClick={()=> endSession(1)}>End selected session/s</button>
+                                    <table className="table mx-auto">
+                                        <thead>
+                                        
+                                        <tr>
+                                            <th>
+                                            <input
+                                                type="checkbox"
+                                                id="select-all"
+                                                onClick={() => check(this)}
+                                                />
+                                                
+                                                
+                                                Select All</th>
+                                            <th>Door number</th>
+                                            <th>Alias</th>
+                                            
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                    {
+                                    pinData
+                                        .map(
+                                            item => 
+                                            {
+                                                
+                                                const doorStats = <tr key={item.id}>
+                                                    <td className="col-md-4">
+                                                        
+                                                    <input
+                                                    type="checkbox"
+                                                    value={item.id}
+                                                    id="checkbox"
+                                                    name="chk"
+                                                    onClick={() => check(this)}
+                                                    />
+                                                    </td>
+                                                    <td className="col-md-4">{item.id}</td>
+                                                    <td className="col-md-4">{item.alias}</td>
+                                                   
+                                                </tr>
+                                                return doorStats
+                                                
+                                            }
+                                        )
+                                        
+                                    }
+                                        </tbody>
+                                    </table>
                                 </div>
                             return status
                         }  

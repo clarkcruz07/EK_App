@@ -6,7 +6,7 @@ export const Header = () =>{
     var settings = {
         dots: true,
         infinite: true,
-        speed: 500,
+        speed: 1000,
         slidesToShow: 1,
         slidesToScroll: 1,
         autoplay: true,
@@ -25,13 +25,14 @@ export const Header = () =>{
                                 <div className="slick-content base-text">By using this smartlocker, you agree to QUBE's Terms & Agreement and Privacy Policy</div>
                             </div>
                             <div>
-                                <p className="base-color">Privacy Policy</p>
-                                <div className="slick-content base-text">By using this smartlocker, you agree to QUBE's Terms & Agreement and Privacy Policy</div>
+                                <p className="base-color">QUBE 24/7 Support</p>
+                                <div className="slick-content base-text">For concerns and inquiries, call our hotline<br/><strong>09176320343 / 09171292877</strong></div>
                             </div>
                             <div>
-                                <p className="base-color">Privacy Policy</p>
-                                <div className="slick-content base-text">By using this smartlocker, you agree to QUBE's Terms & Agreement and Privacy Policy</div>
+                                <p className="base-color">Using locker to play or go home?</p>
+                                <div className="slick-content base-text">You have unlimited re-opens for your lockers. Only choose "Going Home" option when you are about to leave EK.</div>
                             </div>
+                            
                         </Slider>
                     </div>
                     <div className="d-flex justify-content-around align-items-center">
