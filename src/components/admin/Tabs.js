@@ -1,6 +1,6 @@
 import React,{useEffect,useState, useRef} from 'react'
 import axios from 'axios'
-
+import lockerFree from '../../assets/img/lockerFree.svg'
 import lockerOccupied from '../../assets/img/lockerOccupied.svg'
 import eyeIcon from '../../assets/img/eyeIcon.svg'
 
@@ -28,11 +28,17 @@ export const Tabs = () =>{
 
     const [postNewpin, setPin] = useState('')
     const [doorID, setDoorID] = useState(0)
-
+    const [countForSync, setCountForSync] = useState(0)
     const [doors, setDoors] = useState([])
     const numberorder = useRef(null);
+    const [sync, setSync] = useState('')
+    const [syncCheck, setSyncCheck] = useState(0)
     const APIurl = 'http://localhost:3000/LockerDetails'
     const doorURL = 'http://localhost:9090/api/lockercontroller/door/'
+
+
+    const [checkboxList, setCheckboxList] = useState([])
+    
     const toggleTab = (indexTab) => {
         setIndex(indexTab)
     }
@@ -41,6 +47,11 @@ export const Tabs = () =>{
         axios.get('http://localhost:3000/LocalData').then((res) => {
            
             setrebookDoor(res.data)
+            if(res.data.length == 0) {
+                document.getElementById('sync-data').disabled = true
+            }
+            setCountForSync(res.data.length)
+            
         })
         .catch((err) => {
 
@@ -49,7 +60,6 @@ export const Tabs = () =>{
 
     const fetchOpenDoors = () => {
         axios.get(APIurl + '/?doorStatus=1').then((res) => {
-            //console.log(res.data)
             setPinData(res.data)
         })
         .catch((err) => {
@@ -57,8 +67,7 @@ export const Tabs = () =>{
         })
     }
 
-
-
+  
     const popup = (doorID) => {
         setOverlay('hidden')
         setModal('hidden')
@@ -111,19 +120,14 @@ export const Tabs = () =>{
     }
 
     const rebookData = (doorid,timeout) => {
-        /*const api = doorURL+doorid+'/open'
-        axios.get(api).then(res => {
 
-        }).catch(err => { 
-            console.log(err)
-        });*/
                 axios.get('http://localhost:3000/LockerDetails/'+doorid).then((res) => {
                 
                 if(res.data.timeIn){
                     swal.fire({
                         position: 'center',
                         icon: 'warning',
-                        title: 'DI KA NAGBABASA TAPOS MAGREREBOOK KA!',
+                        title: 'Door already booked, try approaching EK Staff for unclaimed items',
                         showConfirmButton: false,
                         timer: 3000
                       })
@@ -185,19 +189,12 @@ export const Tabs = () =>{
                         console.log(err)
                     });
                 }
-               
-                
-                   /* */
+
             })
             .catch((err) => {
                 console.log(err)
             })
-                
-                
-            
-
-
-            
+     
     }
 
     const searchData = (data) => {
@@ -215,9 +212,32 @@ export const Tabs = () =>{
         .filter((checkbox) => checkbox.checked)
         .map((checkbox) => checkbox.value);
       }
-      
-     const check = (source) => {
-            const checkboxes = document.querySelectorAll('input[type=checkbox]');
+    const checkAll = () => {
+       const selectAll = document.getElementById('select-all')
+       
+       const isChecked = selectAll.checked
+
+       Array.from(document.getElementsByName('chk')).forEach(element =>{
+        element.checked = isChecked;
+       })
+
+       const resultEl = document.getElementsByName('chk');
+       resultEl.value = getCheckedValues();
+       setDoors(getCheckedValues())
+       //console.log(getCheckedValues())
+    }
+    const check = () => {
+        const selectAll = document.getElementById('select-all')
+        Array.from(document.querySelectorAll('input[type="checkbox"]:not(#select-all)')).forEach(
+            element => {
+                selectAll.checked = false
+            })
+
+            const resultEl = document.getElementsByName('chk');
+            resultEl.value = getCheckedValues();
+            setDoors(getCheckedValues())
+            //console.log(getCheckedValues())
+           /* const checkboxes = document.querySelectorAll('input[type=checkbox]');
             if(document.getElementById('select-all').checked == true){
                 checkboxes.forEach((cb) => 
                 {                 
@@ -231,16 +251,9 @@ export const Tabs = () =>{
                 })
            }
 
-            /*const uncheckboxes = document.querySelectorAll('input[type=checkbox]:checked');
-            uncheckboxes.forEach((cb) => 
-            {                 
-                cb.checked = false; 
-            });*/
-          
-
         const resultEl = document.getElementsByName('chk');
         resultEl.value = getCheckedValues();
-        setDoors(getCheckedValues())
+        setDoors(getCheckedValues())*/
         
      } 
 
@@ -249,22 +262,55 @@ export const Tabs = () =>{
     const endSession = () => {
         let newarr = []
         axios.get(APIurl).then((res) => {
-            //console.log(res.data)
-                axios
-                .get('http://localhost:9090/api/lockercontroller/doors')
-                .then((response) => {
-                newarr = response.data.data.doors
-                    {Object.keys(response.data.data.doors).map((key) => {
-                        const api = doorURL+key+'/open'
-                        axios.get(api).then(respo => {
-                            
-                       })
-                    })}
+            
+            {Object.values(res.data).map((value) => {
+                const api = doorURL+value.id+'/open'
+               //console.log(api)
+                axios.get(api).then(respo => {
+                    /*** TODO  */
                     
-                })
-                .catch((err) => {
-                    console.log(err)
-                })
+                    axios
+                    .get('http://localhost:3000/LockerDetails')
+                    .then((response) => {
+                    newarr = response.data
+                    
+                        {Object.values(newarr).map((key) => {
+                            axios.patch('http://localhost:3000/LockerDetails/'+key.id, {
+                                transID: "",
+                                lockerLocation: process.env.REACT_APP_LOCKER_LOCATION,
+                                doorSize: "S",
+                                doorStatus: 0,
+                                paymentStatus: "",
+                                payType: process.env.REACT_APP_PAYTYPE,
+                                amount: process.env.REACT_APP_LOCKER_PRICE,
+                                doorOpenCount: "",
+                                mpin: "",
+                                timeIn: "",
+                                timeOut: "",
+                                img_url: lockerFree,
+                                alias: ""
+    
+                            }).then(resp => {
+                                fetchOpenDoors()
+                                const selectAll = document.getElementById('select-all')
+                                Array.from(document.querySelectorAll('input[type="checkbox"]:not(#select-all)')).forEach(
+                                    element => {
+                                        selectAll.checked = false
+                                    })
+                            }).catch(error => {
+                                console.log(error);
+                            });
+                           
+                        })}
+                        
+                    })
+                    .catch((err) => {
+                        console.log(err)
+                    })
+               })
+               
+            })}            
+                
         })
       
        
@@ -273,11 +319,54 @@ export const Tabs = () =>{
         
     }
     
+ const syncData = (sync) => {
+    
+    let arr = []
+    let consArr = []
+    
+    setSync('Syncing local...')
+    document.getElementById('sync-data').disabled = true
+    axios.get('http://localhost:3000/LocalData').then((res) => {
+           arr = res.data
+            {Object.values(arr).map((key) => {
+
+            axios.get('http://localhost:3000/LocalData/'+key.id).then((res) => {
+                const idArr = res.data.id
+                    axios.post('https://ek-locker.onrender.com/api/post/tranDatas/', {
+                    
+                            lockerLocation: res.data.lockerLocation,
+                            payType: res.data.payType,
+                            amount: res.data.amount,
+                            timeIn: res.data.timeIn,
+                            timeOut: res.data.timeOut
+                        
+                    }).then((res) => {
+                            console.log(idArr)
+                            axios.delete('http://localhost:3000/LocalData/'+idArr).then((res)=> {
+                                setSync('Sync local data')                            
+                                setSyncCheck(1)
+                                document.getElementById('sync-data').disabled = false
+                            })
+                           
+                    })
+            }).then(() => {
+                
+            })
+
+            })}
+        }).then((res)=> {
+        })
+        .catch((err) => {
+
+        })
+ }
+
     useEffect(() => {
-        
+        setSync('Sync local data')
     },[])
+
     useEffect(() => {
-        
+       
         if(index == 1){
             document.getElementById('forgot').classList.remove('active')
             document.getElementById('session').classList.remove('active')
@@ -298,12 +387,19 @@ export const Tabs = () =>{
             document.getElementById('sync').classList.remove('active')
             document.getElementById('rebook').classList.remove('active')
             fetchOpenDoors()
+            if(getCheckedValues().length == 0){
+                document.getElementById('end-session').disabled = true
+               }
+               else {
+                document.getElementById('end-session').disabled = false
+               }
         }
         else if(index == 4){
             document.getElementById('forgot').classList.remove('active')
             document.getElementById('session').classList.remove('active')
             document.getElementById('sync').classList.add('active')
             document.getElementById('rebook').classList.remove('active')
+            fetchRebookData()
         }
 
         if(cart.length > 5){
@@ -389,12 +485,13 @@ export const Tabs = () =>{
             </div>
 
             <div className="wrapper z-index bg-white d-flex justify-content-start align-items-center mx-auto tab-wrapper rounded mt-5">
+                
                 {
                     (() => {
                         if(index == 1) {
                             const status = <div className="tab-content py-3 z-index text-center">
-                                    Rebook door
-
+                                    <div className="col-md-12 bg-light py-3 px-3 rounded mb-3"><span className="text-danger"><strong>NOTE:</strong></span> If the user accidentally pressed the <strong>go home button</strong>, they can call the EK staff immediately to rebook the door for them.</div>
+                                    <span className="text-dark">Rebook Door</span>
                                     <div className="textbox-admin py-4"><input type="text" className="rounded" maxLength="16" placeholder='Search alias or door number' /></div>
                                     
                                     <table className="table mx-auto">
@@ -432,7 +529,8 @@ export const Tabs = () =>{
                         } 
                         if(index == 2) {
                             const status = <div className="tab-content py-3 mx-auto">
-                                    Forgot Pin
+                                    <div className="col-md-12 bg-light py-3 px-3 rounded mb-3"><span className="text-danger"><strong>NOTE:</strong></span> If the user forgot their pin, they can call the EK staff immediately to change their desired pin.</div>
+                                    <span className="text-dark">Forgot Pin</span>
                                     <div className="textbox-admin py-4"><input type="text" className="rounded" maxLength="16" placeholder='Search alias or door number' onChange={(e) => searchData(e.target.value)}/></div>
                                     <table className="table mx-auto">
                                         <thead>
@@ -467,9 +565,10 @@ export const Tabs = () =>{
                         }  
                         if(index == 3) {
                             const status = <div className="tab-content py-3 mx-auto">
-                                    Sessions
+                                <div className="col-md-12 bg-light py-3 px-3 rounded mb-3"><span className="text-danger"><strong>NOTE:</strong></span> This tab is use to end the active door sessions. Mostly, this tab is being used at the end of the day. This will open <strong>all doors</strong> and will eventually clear the selected sessions.</div>
+                                    <span className="text-dark">Sessions</span>
                                     <div className="textbox-admin py-4"><input type="text" className="rounded" maxLength="16" placeholder='Search alias or door number' /></div>
-                                    <button className="btn btn-danger end-session mx-5" onClick={()=> endSession(1)}>End selected session/s</button>
+                                    <button className="btn btn-danger end-session mx-5" onClick={()=> endSession(1)} id='end-session' disabled={disable}>End selected session/s</button>
                                     <table className="table mx-auto">
                                         <thead>
                                         
@@ -478,11 +577,11 @@ export const Tabs = () =>{
                                             <input
                                                 type="checkbox"
                                                 id="select-all"
-                                                onClick={() => check(this)}
+                                                onClick={() => checkAll()}
                                                 />
                                                 
                                                 
-                                                Select All</th>
+                                                <span>Select All</span></th>
                                             <th>Door number</th>
                                             <th>Alias</th>
                                             
@@ -503,7 +602,7 @@ export const Tabs = () =>{
                                                     value={item.id}
                                                     id="checkbox"
                                                     name="chk"
-                                                    onClick={() => check(this)}
+                                                    onClick={() => check()}
                                                     />
                                                     </td>
                                                     <td className="col-md-4">{item.id}</td>
@@ -523,7 +622,43 @@ export const Tabs = () =>{
                         }  
                         if(index == 4) {
                             const status = <div className="tab-content py-3 mx-auto">
-                                    Sync
+                                <div className="col-md-12 bg-light py-3 px-3 rounded mb-3"><span className="text-danger"><strong>NOTE:</strong></span> Since this release is running locally, we need to make sure that everything is in proper validation. This tab is use to sync all the local datas to our server.</div>
+                                    <span className="text-dark">Sync data</span>
+                                    {
+                                        (() => {
+                                            if(syncCheck == 0) {
+                                                const status = <div className="mx-auto py-3"> </div>
+                                                return status
+                                            }
+                                            else{
+                                                const status = <div className="mx-auto py-3 col-md-12 error"> <h4 className="text-success">Synching of local transactions posted to server</h4></div>
+                                                return status
+                                            }
+                                            
+                                        })()  
+                                    } 
+
+                                    {
+                                        (() => {
+                                            if(countForSync == 0) {
+                                                const status = <div className="mx-auto py-3 error "> <span className="text-danger">No transactions to sync </span></div>
+                                                return status
+                                            }
+                                            else if(countForSync == 1){
+                                                const status = <div className="mx-auto py-3 col-md-12 error"> <span className="text-danger">There is {countForSync} data to sync</span></div>
+                                                return status
+                                            }
+                                            else{
+                                                const status = <div className="mx-auto py-3 col-md-12 error"> <span className="text-danger">There are {countForSync} data to sync</span></div>
+                                                return status
+                                            }
+                                            
+                                        })()  
+                                    } 
+                                    
+                                    <div className="mx-auto py-3">
+                                    <button className="btn btn-danger" id="sync-data" onClick={() => syncData(1)}>{sync}</button>
+                                    </div>
                                 </div>
                             return status
                         }   

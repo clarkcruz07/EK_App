@@ -216,3 +216,17 @@ canvas{
 .end-session {
     float: right;
 }
+
+.tab-content .error {
+    width: 100% !important;
+    font-size: 25px;
+}
+.tab-content span.text-dark {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.tab-content .col-md-12 {
+    width: 100%;
+    text-align: justify;
+}

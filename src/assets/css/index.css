@@ -161,7 +161,7 @@ input[type="text"] {
 }
 
 input[type="checkbox"]{
-    transform: scale(1.5);
+    transform: scale(2);
 }
 
 .row .support-footer {
@@ -170,7 +170,9 @@ input[type="checkbox"]{
     bottom: 0;
     
 }
-
+th span{
+    margin-left: 1rem;
+}
 .support-footer button {
     border: 0;
     border-radius: 10px 10px 0 0;
