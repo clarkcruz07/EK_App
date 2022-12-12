@@ -257,14 +257,27 @@ export const Tabs = () =>{
         
      } 
 
-     
+    const testDoor = () => {
+        let doorArr = []
+        axios.get('http://localhost:9090/api/lockercontroller/doors').then((res) => {
+            doorArr = res.data.data.doors
+            {Object.keys(doorArr).map((keykey) => {
+                console.log(keykey)
+                const api = doorURL+keykey+'/open'
+                axios.get(api).then((respo) => {
+                    console.log(respo.data)
+                })
+            })}     
+        })
+    } 
 
     const endSession = () => {
         let newarr = []
         axios.get(APIurl).then((res) => {
             
             {Object.values(res.data).map((value) => {
-                const api = doorURL+value.id+'/open'
+                
+                    const api = doorURL+value.id+'/open'
                //console.log(api)
                 axios.get(api).then(respo => {
                     /*** TODO  */
@@ -308,6 +321,7 @@ export const Tabs = () =>{
                         console.log(err)
                     })
                })
+                   
                
             })}            
                 
@@ -568,6 +582,7 @@ export const Tabs = () =>{
                                 <div className="col-md-12 bg-light py-3 px-3 rounded mb-3"><span className="text-danger"><strong>NOTE:</strong></span> This tab is use to end the active door sessions. Mostly, this tab is being used at the end of the day. This will open <strong>all doors</strong> and will eventually clear the selected sessions.</div>
                                     <span className="text-dark">Sessions</span>
                                     <div className="textbox-admin py-4"><input type="text" className="rounded" maxLength="16" placeholder='Search alias or door number' /></div>
+                                    <button  onClick={()=> testDoor()}>Test Door</button>
                                     <button className="btn btn-danger end-session mx-5" onClick={()=> endSession(1)} id='end-session' disabled={disable}>End selected session/s</button>
                                     <table className="table mx-auto">
                                         <thead>
