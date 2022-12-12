@@ -3,7 +3,6 @@ import axios from 'axios'
 import lockerFree from '../../assets/img/lockerFree.svg'
 import lockerOccupied from '../../assets/img/lockerOccupied.svg'
 import eyeIcon from '../../assets/img/eyeIcon.svg'
-
 import swal from 'sweetalert2'
 export const Tabs = () =>{
     const [index,setIndex] = useState(1)
@@ -38,6 +37,9 @@ export const Tabs = () =>{
 
 
     const [checkboxList, setCheckboxList] = useState([])
+
+
+    const [filteredResults, setFilteredResults] = useState([]);
     
     const toggleTab = (indexTab) => {
         setIndex(indexTab)
@@ -198,13 +200,14 @@ export const Tabs = () =>{
     }
 
     const searchData = (data) => {
-        console.log(data)
         axios.get('http://localhost:3000/LockerDetails/'+data).then(resp => {
            console.log(resp.data)
+           fetchOpenDoors('')
+           fetchOpenDoors(resp.data)
         }).catch(error => {
             console.log(error);
         });
-        
+
     }
 
     const getCheckedValues = () => {
@@ -377,6 +380,14 @@ export const Tabs = () =>{
 
     useEffect(() => {
         setSync('Sync local data')
+
+        const interval = setInterval(() => {
+            // You'd want an exit condition here
+           console.log()
+         }, 3000);
+         
+           return () => clearInterval(interval);
+
     },[])
 
     useEffect(() => {

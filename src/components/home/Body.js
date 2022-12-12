@@ -133,13 +133,13 @@ export const Body = ({setPopup}) =>{
         setInput('')
     }
     const postPin = (pin, doorNumber) => {
+        
         axios.get(APIUrl+'/?alias='+alias).then((res) => {
             console.log(res.data.length)
             if(res.data.length == 1){
                 setErrorStatus('Duplicate alias is not allowed')
                 
-            }
-            else {
+            }else {
                 
                 setModal('')
                 setNewModal('hidden')
@@ -198,15 +198,15 @@ export const Body = ({setPopup}) =>{
                     headers: {
                       accept: 'application/json',
                       'content-type': 'application/json',
-                      authorization: 'Basic c2tfdGVzdF9adDVGZVlhcVBmZmp3VWF1U3Y4RUVURFA6'
+                      authorization: 'Basic c2tfbGl2ZV9hQ1g4cExSaUR1WFFnZ21BVUtzREh3RVo6'
                     },
                     body: JSON.stringify({
                       data: {
                         attributes: {
-                          amount: 25000,
+                          amount: 10000,
                           redirect: {
-                            success: 'https://pandora-v2.onrender.com/api/success/',
-                            failed: 'https://pandora-v2.onrender.com/api/success/'
+                            success: 'https://qubesmartlockers.com/',
+                            failed: 'https://qubesmartlockers.com/'
                           },
                           type: 'gcash',
                           currency: 'PHP'
@@ -250,7 +250,7 @@ export const Body = ({setPopup}) =>{
             method: 'GET',
             headers: {
               accept: 'application/json',
-              authorization: 'Basic c2tfdGVzdF9adDVGZVlhcVBmZmp3VWF1U3Y4RUVURFA6'
+              authorization: 'Basic c2tfbGl2ZV9hQ1g4cExSaUR1WFFnZ21BVUtzREh3RVo6'
             }
           };
           
@@ -265,12 +265,12 @@ export const Body = ({setPopup}) =>{
                     headers: {
                       accept: 'application/json',
                       'content-type': 'application/json',
-                      authorization: 'Basic c2tfdGVzdF9adDVGZVlhcVBmZmp3VWF1U3Y4RUVURFA6'
+                      authorization: 'Basic c2tfbGl2ZV9hQ1g4cExSaUR1WFFnZ21BVUtzREh3RVo6'
                     },
                     body: JSON.stringify({
                       data: {
                         attributes: {
-                          amount: 25000,
+                          amount: 10000,
                           description: "Payment for Locker Location " + process.env.REACT_APP_LOCKER_LOCATION + ", with mpin # " + pin,
                           source: {type: 'source', id: transactionID},
                           currency: 'PHP',
