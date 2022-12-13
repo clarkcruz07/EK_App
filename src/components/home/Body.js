@@ -131,6 +131,12 @@ export const Body = ({setPopup}) =>{
     const clearAll = () => {     
         setCart('')
         setInput('')
+        setActiveLottie(0)
+        setHome('')
+        setActive('')
+        document.getElementById('lottie-wrapper').classList.add('opacity')
+        document.getElementById('lottie-multiple').classList.add('pointer')
+        document.getElementById('lottie-multiple').classList.remove('active')
     }
     const postPin = (pin, doorNumber) => {
         
@@ -158,6 +164,7 @@ export const Body = ({setPopup}) =>{
         setHome('')
         setActiveLottie(1)
     }
+  
     const cancelTransaction = () => {
         setOverlay('')
         setModal('')
@@ -198,14 +205,15 @@ export const Body = ({setPopup}) =>{
                     headers: {
                       accept: 'application/json',
                       'content-type': 'application/json',
-                      authorization: 'Basic c2tfbGl2ZV9hQ1g4cExSaUR1WFFnZ21BVUtzREh3RVo6'
+                      //authorization: 'Basic c2tfbGl2ZV9hQ1g4cExSaUR1WFFnZ21BVUtzREh3RVo6'
+                      authorization: 'Basic c2tfdGVzdF9adDVGZVlhcVBmZmp3VWF1U3Y4RUVURFA6'
                     },
                     body: JSON.stringify({
                       data: {
                         attributes: {
                           amount: 10000,
                           redirect: {
-                            success: 'https://qubesmartlockers.com/',
+                            success: 'https://qubesmartlocker.onrender.com/',
                             failed: 'https://qubesmartlockers.com/'
                           },
                           type: 'gcash',
@@ -245,12 +253,13 @@ export const Body = ({setPopup}) =>{
     }
 
     const fetchPaymentStatus = (pin,door_number,transactionID, checkoutUrl) => {
-
+        
         const options = {
             method: 'GET',
             headers: {
               accept: 'application/json',
-              authorization: 'Basic c2tfbGl2ZV9hQ1g4cExSaUR1WFFnZ21BVUtzREh3RVo6'
+              //authorization: 'Basic c2tfbGl2ZV9hQ1g4cExSaUR1WFFnZ21BVUtzREh3RVo6'
+              authorization: 'Basic c2tfdGVzdF9adDVGZVlhcVBmZmp3VWF1U3Y4RUVURFA6'
             }
           };
           
@@ -265,7 +274,9 @@ export const Body = ({setPopup}) =>{
                     headers: {
                       accept: 'application/json',
                       'content-type': 'application/json',
-                      authorization: 'Basic c2tfbGl2ZV9hQ1g4cExSaUR1WFFnZ21BVUtzREh3RVo6'
+                      //authorization: 'Basic c2tfbGl2ZV9hQ1g4cExSaUR1WFFnZ21BVUtzREh3RVo6'
+                      authorization: 'Basic c2tfdGVzdF9adDVGZVlhcVBmZmp3VWF1U3Y4RUVURFA6'
+                      
                     },
                     body: JSON.stringify({
                       data: {
@@ -283,13 +294,9 @@ export const Body = ({setPopup}) =>{
                     .then(response => response.json())
                     .then(response => {
                         const status = response.data.attributes.status 
-                        
+                        console.log(pin+ " === " + door_number + " === " + transactionID + " === " +checkoutUrl + '=== ' + status)
                         if(status == 'paid'){
-                            console.log(checkoutUrl + ' - ' + door_number + ' - ' + pin)
-                            
-                            const api = doorURL+door_number+'/open'
-                            axios.get(api).then(res => {
-                               
+                            //console.log(checkoutUrl + ' - ' + door_number + ' - ' + pin)
                             axios.patch('http://localhost:3000/LockerDetails/'+door_number, {
                                 doorStatus: 1,
                                 paymentStatus: 'paid',
@@ -302,17 +309,20 @@ export const Body = ({setPopup}) =>{
                                 alias: alias
 
                             }).then(resp => {
+                                const api = doorURL+door_number+'/open'
+                                axios.get(api).then(res => {
+                                }).catch(err => { 
+                                    console.log(err)
+                                });
+
                                 cancelTransaction()
                                 fetchData()
+                                clearInterval(dataInterval) 
                             }).catch(error => {
                                 console.log(error);
                             });
                                 
-                                
-                                
-                            }).catch(err => { 
-                                console.log(err)
-                            });
+                            /**/
                         }
                         
                         
@@ -424,20 +434,20 @@ export const Body = ({setPopup}) =>{
     }
     useEffect(() => {
         fetchData()  
-        const dataInterval = setInterval(()=> {
+       /* const dataInterval = setInterval(()=> {
             checkDoors()
-        },500)
+        },500)*/
 
        setPopup(modalPopup)
        localStorage.removeItem('modalCheck')
-        return () => clearInterval(dataInterval)  
+        //return () => clearInterval(dataInterval)  
          
     },[])
     const modalPopup = 1
     const numberorder = useRef(null);
     useEffect((e) => {
        if(doorStatus == 0){
-            if(cart.length < 4 || alias.length == 0){
+            if(cart.length < 6 || alias.length == 0){
                 setPointNewPin('pointer')
                 setDisableNewPin(true)
             }
@@ -453,14 +463,29 @@ export const Body = ({setPopup}) =>{
             }else {
                 setPointNewPin('')
                 setDisableNewPin(false)
+               
             }
        }
 
 
+       
+
         if(cart.length > 5 && localStorage.getItem('modalCheck') != 1 ){
             setDisable(true)
             setPoint('pointer')
+            
+            document.getElementById('lottie-wrapper').classList.remove('opacity')
+            document.getElementById('lottie-multiple').classList.remove('pointer')
         }
+        else if(cart.length < 4 && localStorage.getItem('modalCheck') != 1){
+            setDisable(false)
+            setPoint('')
+            setHome('')
+            setActive('')
+           // document.getElementById('lottie-wrapper').classList.add('opacity')
+           // document.getElementById('lottie-multiple').classList.add('pointer')
+        }
+
         else if(cart.length > 15 && localStorage.getItem('modalCheck') == 1 ){
             setDisable(true)
             setPoint('pointer')
@@ -470,6 +495,8 @@ export const Body = ({setPopup}) =>{
         else{
             setDisable(false)
             setPoint('')
+            setHome('')
+            setActive('')
         }
        
         if(localStorage.getItem('modalCheck') == 1){
@@ -646,15 +673,15 @@ export const Body = ({setPopup}) =>{
                                 <div onClick={() => handleClick(0)} disabled={disable} id="btn-number" className={point ? 'pointer' : ''}>0</div>
                                 <div onClick={()=>clearAll()} className="btn btn-danger mx-2 clear d-flex justify-content-center align-items-center">Clear pin</div>
                                 <input type="hidden" value={cart} id="hidden-text" onChange={(e) => setPin(e.target.value)}/>
-                                <div className="text-dark position-absolute lottie-wrapper">How would you like to open your locker?
-                                    <div className={activeReopen ? "col-md-12 border-radius my-3 lottie-multiple d-flex justify-content-around align-items-center  active" : "col-md-12 border-radius my-3 lottie-multiple d-flex justify-content-around align-items-center"} onClick={changeActive}>
+                                <div className="text-dark position-absolute lottie-wrapper  opacity" id="lottie-wrapper" >How would you like to open your locker?
+                                    <div className={activeReopen ? "col-md-12 border-radius my-3 lottie-multiple d-flex justify-content-around align-items-center  active" : "col-md-12 border-radius my-3 lottie-multiple d-flex justify-content-around align-items-center"} onClick={changeActive} id="lottie-multiple">
                                         <div><Player src={reopen} loop autoplay /></div>
                                         <div>Open and play at EK
                                             <div><small>Re-open and lock your locker to use again later</small></div>
                                         </div>
                                         
                                     </div>
-                                    <div className={activeHome ? 'col-md-12 border-radius my-3 lottie-multiple d-flex justify-content-around align-items-center  active' : "col-md-12 border-radius my-3 lottie-multiple d-flex justify-content-around align-items-center"} onClick={changeHome}>
+                                    <div className={activeHome ? 'col-md-12 border-radius my-3 lottie-multiple d-flex justify-content-around align-items-center  active' : "col-md-12 border-radius my-3 lottie-multiple d-flex justify-content-around align-items-center"} onClick={changeHome} id="lottie-multiple">
                                         <div><Player src={gohome} loop autoplay /></div>
                                         <div>Open and go home
                                             <div><small>Get your items and checkout when leaving EK</small></div>

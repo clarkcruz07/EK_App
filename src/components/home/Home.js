@@ -9,10 +9,9 @@ import {Link} from 'react-router-dom'
 import useAutoLogout from "./IdleTimeout";
 export const Home = () =>{
     const videoBg = './assets/gradientBG.mp4'
-    let timer = useAutoLogout(30);
+    let timer = useAutoLogout(300);
 
     const [popup, setPopup] = useState('')
-
     //const [loading, setLoader] = useState(loader)
     if(timer == 0){
         document.getElementById('lottie-player').classList.remove('hidden')
@@ -20,8 +19,10 @@ export const Home = () =>{
     const lottieEnd = () => {
         document.getElementById('lottie-player').classList.add('hidden')
     }
+    
+
     return (
-        <div className="container">
+        <div className="container" id='container-id' >
             
             <div className="home hidden" id="lottie-player" onClick={lottieEnd}>
             <Player 

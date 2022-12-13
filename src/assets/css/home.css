@@ -33,14 +33,14 @@ input[type="radio"] {
 .modal-button {
     position: absolute;
     top: 78%;
-    left: 5rem;
+    left: 2.5rem;
 }
 
 .modal.second.free
 .modal-button {
     position: absolute;
     top: 65%;
-    left: 5rem;
+    left: 4.5rem;
 }
 
 .modal.second.admin
@@ -65,6 +65,8 @@ input[type="radio"] {
     border-radius: 10px;
     height: 107px;
     color: #16D391;
+    transform: scale(1.1);
+    transition: 0.3s;
 }
 .lottie-multiple .lf-player-container{
     width: 136px;
@@ -85,7 +87,9 @@ input[type="radio"] {
     border: 0;
     color: #fff;
 }
-
+.modal.second.occupied button{
+    width: 426px;
+}
 
 .btn-cancel button {
     background-color: #FF0D0D;
@@ -229,4 +233,8 @@ canvas{
 .tab-content .col-md-12 {
     width: 100%;
     text-align: justify;
+}
+
+.lottie-wrapper {
+    transition: 0.3s;
 }

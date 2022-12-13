@@ -14,7 +14,14 @@
     src: url('../font/Rubik-Medium.ttf');
 }
 html, body {
-    font-family: rubik !important;    
+    font-family: rubik !important; 
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */   
 }
 
 h1,h2,h3,h4,h5,h6 {
@@ -135,7 +142,9 @@ a:hover {
 .pointer{
     pointer-events: none;
 }
-
+.opacity {
+    opacity: 0.1;
+}
 .btn-success {
     background-color: #16D391 !important;
 } 
@@ -144,7 +153,7 @@ a:hover {
     background-color: #fff !important;
 }
 
-.wrapper div {
+.wrapper .tab-title {
     width: 20%;
 }
 
@@ -171,7 +180,8 @@ input[type="checkbox"]{
     
 }
 th span{
-    margin-left: 1rem;
+    /*margin-left: 1rem;*/
+    font-weight: bold;
 }
 .support-footer button {
     border: 0;
@@ -188,5 +198,42 @@ th span{
 
 .table > tbody {
     vertical-align: middle !important;
+}
+
+.tss-qbo1l6-MUIDataTableToolbar-actions button:nth-child(2),
+.tss-qbo1l6-MUIDataTableToolbar-actions span{
+    display: none;
+}
+
+.css-11mde6h-MuiPaper-root {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+.tss-1akey0g-MUIDataTableHeadCell-data{
+    font-weight: bold;
+}
+.css-12wnr2w-MuiButtonBase-root-MuiCheckbox-root{
+    display: none !important;
+}
+.MuiToolbar-root p {
+    margin-bottom: 0;
+}
+.tab-title {
+    cursor: pointer;
+}
+.tab-wrapper {
+    position: relative;
+}
+div#select-all-wrapper {
+    position: absolute;
+    top: 14.5rem;
+    z-index: 99999;
+    left: 4.7rem;
+}
+#select-all {
+    margin-right: 1rem;
+}
+#select-all-wrapper span {
+    font-weight: bold;
 }
 /* */

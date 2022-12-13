@@ -4,6 +4,7 @@ import lockerFree from '../../assets/img/lockerFree.svg'
 import lockerOccupied from '../../assets/img/lockerOccupied.svg'
 import eyeIcon from '../../assets/img/eyeIcon.svg'
 import swal from 'sweetalert2'
+import MUIDataTable from "mui-datatables";
 export const Tabs = () =>{
     const [index,setIndex] = useState(1)
 
@@ -41,6 +42,11 @@ export const Tabs = () =>{
 
     const [filteredResults, setFilteredResults] = useState([]);
     
+    let columnsForgot = []
+    let dataForgot = []
+    let columnsRebook = []
+    let dataRebook = []
+    let columnSessions = []
     const toggleTab = (indexTab) => {
         setIndex(indexTab)
     }
@@ -61,8 +67,11 @@ export const Tabs = () =>{
     }
 
     const fetchOpenDoors = () => {
+       
         axios.get(APIurl + '/?doorStatus=1').then((res) => {
             setPinData(res.data)
+            
+            
         })
         .catch((err) => {
 
@@ -341,7 +350,7 @@ export const Tabs = () =>{
     let arr = []
     let consArr = []
     
-    setSync('Syncing local...')
+    setSync('Synching local...')
     document.getElementById('sync-data').disabled = true
     axios.get('http://localhost:3000/LocalData').then((res) => {
            arr = res.data
@@ -349,7 +358,7 @@ export const Tabs = () =>{
 
             axios.get('http://localhost:3000/LocalData/'+key.id).then((res) => {
                 const idArr = res.data.id
-                    axios.post('https://ek-locker.onrender.com/api/post/tranDatas/', {
+                    axios.post('https://ek-qubelocker.onrender.com/api/post/transDatas/', {
                     
                             lockerLocation: res.data.lockerLocation,
                             payType: res.data.payType,
@@ -381,12 +390,7 @@ export const Tabs = () =>{
     useEffect(() => {
         setSync('Sync local data')
 
-        const interval = setInterval(() => {
-            // You'd want an exit condition here
-           console.log()
-         }, 3000);
-         
-           return () => clearInterval(interval);
+      
 
     },[])
 
@@ -447,7 +451,14 @@ export const Tabs = () =>{
         
     })
 
-
+    
+      const options = {
+        filterType: "dropdown",
+        responsive: "vertical"
+      };
+      columnsForgot = ["Door Number", "Alias", " "]
+      columnsRebook = ["Door Number", "Alias", "Time Out", " "]
+      columnSessions = [' ','Door Number', 'Alias']
     return (
         <div className="row">
              <div className={overlay ? 'overlay' : 'overlay hidden'}></div>
@@ -517,74 +528,62 @@ export const Tabs = () =>{
                             const status = <div className="tab-content py-3 z-index text-center">
                                     <div className="col-md-12 bg-light py-3 px-3 rounded mb-3"><span className="text-danger"><strong>NOTE:</strong></span> If the user accidentally pressed the <strong>go home button</strong>, they can call the EK staff immediately to rebook the door for them.</div>
                                     <span className="text-dark">Rebook Door</span>
-                                    <div className="textbox-admin py-4"><input type="text" className="rounded" maxLength="16" placeholder='Search alias or door number' /></div>
                                     
-                                    <table className="table mx-auto">
-                                        <thead>
-                                        <tr>
-                                            <th>Door number</th>
-                                            <th>Alias</th>
-                                            <th>Time Out</th>
-                                            <th>&nbsp;</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        {
-                                    rebookDoor
-                                        .map(
-                                            item => 
-                                            {
+                                    
+                                    <MUIDataTable
+                                        data= {
+                                            rebookDoor
+                                                .map(
+                                                    item => 
+                                                    {
+                                                        
+                                                        dataRebook = [
+                                                            item.transID,
+                                                            item.alias,
+                                                            item.timeOut,
+                                                            <button className="btn btn-danger" onClick={() => rebookData(item.transID, item.timeOut)}>Rebook</button>
+                                                        ]  
+                                                        return dataRebook
+                                                    }
+                                                    
+                                                )
                                                 
-                                                const doorStats = <tr key={item.id}>
-                                                    <td className="col-md-4">{item.transID}</td>
-                                                    <td className="col-md-4">{item.alias}</td>
-                                                    <td className="col-md-4">{item.timeOut}</td>
-                                                    <td className="col-md-4"><button className="btn btn-danger" onClick={() => rebookData(item.transID, item.timeOut)}>Rebook</button></td>
-                                                </tr>
-                                                return doorStats
-                                            }
-                                        )
-                                        
-                                    }
-                                        </tbody>
-                                    </table>
+                                            }  
+                                        columns= {columnsRebook} 
+                                        options={options}
+                                    />
+
                                     
                                 </div>
                             return status
                         } 
                         if(index == 2) {
+
                             const status = <div className="tab-content py-3 mx-auto">
                                     <div className="col-md-12 bg-light py-3 px-3 rounded mb-3"><span className="text-danger"><strong>NOTE:</strong></span> If the user forgot their pin, they can call the EK staff immediately to change their desired pin.</div>
                                     <span className="text-dark">Forgot Pin</span>
-                                    <div className="textbox-admin py-4"><input type="text" className="rounded" maxLength="16" placeholder='Search alias or door number' onChange={(e) => searchData(e.target.value)}/></div>
-                                    <table className="table mx-auto">
-                                        <thead>
-                                        <tr>
-                                            <th>Door number</th>
-                                            <th>Alias</th>
-                                            <th>&nbsp;</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                    {
-                                    pinData
-                                        .map(
-                                            item => 
-                                            {
+                                   
+                                    <MUIDataTable
+                                        data= {
+                                            pinData
+                                                .map(
+                                                    item => 
+                                                    {
+                                                        
+                                                        dataForgot = [
+                                                            item.id,
+                                                            item.alias,
+                                                            <button className="btn btn-danger" onClick={() => popup(item.id)}>Change pin</button>
+                                                        ]  
+                                                        return dataForgot
+                                                    }
+                                                    
+                                                )
                                                 
-                                                const doorStats = <tr key={item.id}>
-                                                    <td className="col-md-4">{item.id}</td>
-                                                    <td className="col-md-4">{item.alias}</td>
-                                                    <td className="col-md-4"><button className="btn btn-danger" onClick={() => popup(item.id)}>Change pin</button></td>
-                                                </tr>
-                                                return doorStats
-                                                
-                                            }
-                                        )
-                                        
-                                    }
-                                        </tbody>
-                                    </table>
+                                            }  
+                                        columns= {columnsForgot} 
+                                        options={options}
+                                    />
                                 </div>
                             return status
                         }  
@@ -592,57 +591,40 @@ export const Tabs = () =>{
                             const status = <div className="tab-content py-3 mx-auto">
                                 <div className="col-md-12 bg-light py-3 px-3 rounded mb-3"><span className="text-danger"><strong>NOTE:</strong></span> This tab is use to end the active door sessions. Mostly, this tab is being used at the end of the day. This will open <strong>all doors</strong> and will eventually clear the selected sessions.</div>
                                     <span className="text-dark">Sessions</span>
-                                    <div className="textbox-admin py-4"><input type="text" className="rounded" maxLength="16" placeholder='Search alias or door number' /></div>
+                                    
                                     <button  onClick={()=> testDoor()}>Test Door</button>
                                     <button className="btn btn-danger end-session mx-5" onClick={()=> endSession(1)} id='end-session' disabled={disable}>End selected session/s</button>
-                                    <table className="table mx-auto">
-                                        <thead>
-                                        
-                                        <tr>
-                                            <th>
-                                            <input
-                                                type="checkbox"
-                                                id="select-all"
-                                                onClick={() => checkAll()}
-                                                />
-                                                
-                                                
-                                                <span>Select All</span></th>
-                                            <th>Door number</th>
-                                            <th>Alias</th>
-                                            
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                    {
-                                    pinData
-                                        .map(
-                                            item => 
-                                            {
-                                                
-                                                const doorStats = <tr key={item.id}>
-                                                    <td className="col-md-4">
+                                    <div id="select-all-wrapper"> <input type="checkbox" id="select-all" onClick={() => checkAll()}/><span>Select All</span> </div>
+                                   
+                                    <MUIDataTable
+                                        data= {
+                                            pinData
+                                                .map(
+                                                    item => 
+                                                    {
                                                         
-                                                    <input
-                                                    type="checkbox"
-                                                    value={item.id}
-                                                    id="checkbox"
-                                                    name="chk"
-                                                    onClick={() => check()}
-                                                    />
-                                                    </td>
-                                                    <td className="col-md-4">{item.id}</td>
-                                                    <td className="col-md-4">{item.alias}</td>
-                                                   
-                                                </tr>
-                                                return doorStats
+                                                        dataForgot = [
+                                                            <input
+                                                            type="checkbox"
+                                                            value={item.id}
+                                                            id="checkbox"
+                                                            name="chk"
+                                                            onClick={() => check()}
+                                                            />,
+                                                            item.id,
+                                                            item.alias,
+                                                            
+                                                        ]  
+                                                        return dataForgot
+                                                    }
+                                                    
+                                                )
                                                 
-                                            }
-                                        )
-                                        
-                                    }
-                                        </tbody>
-                                    </table>
+                                            }  
+                                        columns= {columnSessions} 
+                                        options={options}
+                                    />
+                                    
                                 </div>
                             return status
                         }  

@@ -6,11 +6,11 @@ export const Header = () =>{
     var settings = {
         dots: true,
         infinite: true,
-        speed: 1000,
+        speed: 3000,
         slidesToShow: 1,
         slidesToScroll: 1,
         autoplay: true,
-        autoplaySpeed: 2000,
+        autoplaySpeed: 10000,
         draggable: true
       };
     return (
