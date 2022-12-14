@@ -288,7 +288,7 @@ export const Tabs = () =>{
     const endSession = () => {
         let newarr = []
         /*** TODO  ***/
-        //axios.get('http://localhost:9090/api/lockercontroller/getAll').then(() => {
+        axios.get('http://localhost:9090/api/lockercontroller/getAll').then(() => {
         if(getCheckedValues().length == 0) {
 
         }
@@ -297,29 +297,51 @@ export const Tabs = () =>{
             .get('http://localhost:3000/LockerDetails')
             .then((response) => {
             newarr = response.data
-                {Object.values(newarr).map((key) => {
-                    axios.get('http://localhost:3000/LockerDetails/'+doors, {
+                {Object.values(getCheckedValues()).map((key) => {
+                    //console.log(key)
+                    axios.get('http://localhost:3000/LockerDetails/'+key, {
                       
 
                     }).then(resp => {
-                        {Object.values(resp).map((val) => {
-                            console.log(val.lockerLocation)
-                            /*axios.patch('http://localhost:3000/LockerDetails/'+ val.id, {
-                                    transID: "",
-                                    lockerLocation: val.lockerLocation,
+                        
+                        
+                            axios.post('http://localhost:3000/LocalData/', {
+                                    transID: resp.data.id,
+                                    lockerLocation: resp.data.lockerLocation,
                                     doorSize: "S",
                                     doorStatus: 1,
-                                    paymentStatus: val.paymentStatus,
-                                    payType: val.payType,
-                                    amount: val.amount,
+                                    paymentStatus: resp.data.paymentStatus,
+                                    payType: resp.data.payType,
+                                    amount: resp.data.amount,
                                     doorOpenCount: "",
-                                    mpin: val.mpin,
-                                    timeIn: val.timeIn,
+                                    mpin: resp.data.mpin,
+                                    timeIn: resp.data.timeIn,
                                     timeOut: "",
-                                    img_url: val.img_url,
-                                    alias: val.alias
-                                })*/
-                        })}
+                                    img_url: resp.data.img_url,
+                                    alias: resp.data.alias
+                                }).then((res) => {
+                                    console.log(res.data.transID)
+                                    axios.patch('http://localhost:3000/LockerDetails/'+res.data.transID, {
+                                        transID: "",
+                                        lockerLocation: process.env.REACT_APP_LOCKER_LOCATION,
+                                        doorSize: "S",
+                                        doorStatus: 0,
+                                        paymentStatus: "",
+                                        payType: process.env.REACT_APP_PAYTYPE,
+                                        amount: process.env.REACT_APP_LOCKER_PRICE,
+                                        doorOpenCount: "",
+                                        mpin: "",
+                                        timeIn: "",
+                                        timeOut: "",
+                                        img_url: lockerFree,
+                                        alias: ""
+
+                                    }).then(resp => {
+                                        fetchOpenDoors();
+                                    }).catch(error => {
+                                        console.log(error);
+                                    });
+                                })
                         
                         fetchOpenDoors()
                         const selectAll = document.getElementById('select-all')
@@ -341,7 +363,7 @@ export const Tabs = () =>{
             
 
 
-        //})
+        })
         
    
     }
@@ -401,35 +423,28 @@ export const Tabs = () =>{
             document.getElementById('session').classList.remove('active')
             document.getElementById('sync').classList.remove('active')
             document.getElementById('rebook').classList.add('active') 
-            //fetchRebookData()
+            
         }
         else if(index == 2){
             document.getElementById('forgot').classList.add('active')
             document.getElementById('session').classList.remove('active')
             document.getElementById('sync').classList.remove('active')
             document.getElementById('rebook').classList.remove('active')
-            //fetchOpenDoors()
+            
         }
         else if(index == 3){
             document.getElementById('forgot').classList.remove('active')
             document.getElementById('session').classList.add('active')
             document.getElementById('sync').classList.remove('active')
             document.getElementById('rebook').classList.remove('active')
-            //fetchOpenDoors()
-           /* if(getCheckedValues().length == 0){
-                document.getElementById('end-session').disabled = true
-               }
-               else {
-                document.getElementById('end-session').disabled = false
-               }
-               */
+
         }
         else if(index == 4){
             document.getElementById('forgot').classList.remove('active')
             document.getElementById('session').classList.remove('active')
             document.getElementById('sync').classList.add('active')
             document.getElementById('rebook').classList.remove('active')
-            //fetchRebookData()
+            
         }
 
         if(cart.length > 5){
@@ -639,7 +654,7 @@ export const Tabs = () =>{
                                                 return status
                                             }
                                             else{
-                                                const status = <div className="mx-auto py-3 col-md-12 error"> <h4 className="text-success">Synching of local transactions posted to server</h4></div>
+                                                const status = <div className="mx-auto py-3 col-md-12 error"> <h4 className="text-success">Syncing of local transactions posted to server</h4></div>
                                                 return status
                                             }
                                             

@@ -196,7 +196,10 @@ export const Body = ({setPopup}) =>{
         localStorage.removeItem('doorID')
         localStorage.removeItem('timein')
         localStorage.removeItem('alias')
-        document.getElementById('alias-text').value = ""
+        if(localStorage.getItem('modalCheck') != 1){
+            document.getElementById('alias-text').value = ""
+        }
+        
         localStorage.removeItem('modalCheck')
      
     }
@@ -360,6 +363,8 @@ export const Body = ({setPopup}) =>{
                     setErrorStatus('Wrong MPIN, cannot open door!')
                     setPin('')
                     setCart('')
+                    document.getElementById('lottie-wrapper').classList.add('opacity')
+                    document.getElementById('lottie-multiple').classList.add('pointer')
                 }
                 
             })
@@ -404,7 +409,7 @@ export const Body = ({setPopup}) =>{
                             mpin: "",
                             timeIn: "",
                             timeOut: "",
-                            img_url: "/static/media/lockerFree.405b616d76d7e3fa8a26558893d947c8.svg",
+                            img_url: lockerFree,
                             alias: ""
 
                         }).then(resp => {
@@ -423,6 +428,8 @@ export const Body = ({setPopup}) =>{
                     setErrorStatus('Wrong MPIN, cannot open door!')
                     setPin('')
                     setCart('')
+                    document.getElementById('lottie-wrapper').classList.add('opacity')
+                    document.getElementById('lottie-multiple').classList.add('pointer')
                 }
                 
             })
@@ -442,7 +449,7 @@ export const Body = ({setPopup}) =>{
     }
     useEffect(() => {
         fetchData()  
-       /* const dataInterval = setInterval(()=> {
+        /*const dataInterval = setInterval(()=> {
             checkDoors()
         },500)*/
 
@@ -517,7 +524,6 @@ export const Body = ({setPopup}) =>{
                 numberorder.current.focus();
               }
         }
-        checkDoors()
        
     })
 

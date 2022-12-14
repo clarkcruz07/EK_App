@@ -201,7 +201,9 @@ canvas{
 .tab-content{
     text-align: center;
 }
-
+.tab-content .error{
+    text-align: center !important;
+}
 .wrapper .tab-content , .textbox-admin{
     width: 100% !important;
 }
