@@ -22,15 +22,15 @@ export const Header = () =>{
                         <Slider {...settings}>
                             <div>
                                 <p className="base-color">Privacy Policy</p>
-                                <div className="slick-content base-text">By using this smartlocker, you agree to QUBE's Terms & Agreement and Privacy Policy</div>
+                                <div className="slick-content base-text">By using this smartlocker, you agree to QUBE's <strong>Terms of Use</strong> and <strong>Privacy Policy</strong></div>
                             </div>
                             <div>
                                 <p className="base-color">QUBE 24/7 Support</p>
-                                <div className="slick-content base-text">For concerns and inquiries, call our hotline<br/><strong>09176320343 / 09171292877</strong></div>
+                                <div className="slick-content base-text">For concerns and inquiries, contact our customer support at <strong> 09176320343 / 09171292877 </strong> or <strong>support@qubesmart360.com</strong></div>
                             </div>
                             <div>
                                 <p className="base-color">Using locker to play or go home?</p>
-                                <div className="slick-content base-text">You have unlimited re-opens for your lockers. Only choose "Going Home" option when you are about to leave EK.</div>
+                                <div className="slick-content base-text">You have unlimited re-opens for your lockers. Only choose <strong>"Going Home"</strong> option when you are about to leave EK.</div>
                             </div>
                             
                         </Slider>

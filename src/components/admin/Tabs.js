@@ -49,6 +49,20 @@ export const Tabs = () =>{
     let columnSessions = []
     const toggleTab = (indexTab) => {
         setIndex(indexTab)
+
+        if(indexTab == 1) {
+            fetchRebookData()
+        }
+        else if(indexTab == 2) {
+            fetchOpenDoors()
+        }
+        else if(indexTab == 3) {
+            fetchOpenDoors()
+        }
+        else if(indexTab == 4) {
+            fetchRebookData()
+        }
+        
     }
 
     const fetchRebookData = () => {
@@ -59,6 +73,7 @@ export const Tabs = () =>{
                 document.getElementById('sync-data').disabled = true
             }
             setCountForSync(res.data.length)
+            
             
         })
         .catch((err) => {
@@ -123,6 +138,13 @@ export const Tabs = () =>{
         axios.patch('http://localhost:3000/LockerDetails/'+doorID, {
             mpin: cart
         }).then(resp => {
+            swal.fire({
+                position: 'center',
+                icon: 'success',
+                title: 'You have successfully changed your door PIN',
+                showConfirmButton: false,
+                timer: 3000
+              })
             cancelTransaction()
         }).catch(error => {
             console.log(error);
@@ -186,6 +208,8 @@ export const Tabs = () =>{
                                         showConfirmButton: false,
                                         timer: 3000
                                       })
+
+                                      fetchRebookData()
                                 }).catch(error => {
                                     console.log(error);
                                 });
@@ -208,16 +232,6 @@ export const Tabs = () =>{
      
     }
 
-    const searchData = (data) => {
-        axios.get('http://localhost:3000/LockerDetails/'+data).then(resp => {
-           console.log(resp.data)
-           fetchOpenDoors('')
-           fetchOpenDoors(resp.data)
-        }).catch(error => {
-            console.log(error);
-        });
-
-    }
 
     const getCheckedValues = () => {
         return Array.from(document.getElementsByName('chk'))
@@ -269,89 +283,67 @@ export const Tabs = () =>{
         
      } 
 
-    const testDoor = () => {
-        let doorArr = []
-        axios.get('http://localhost:9090/api/lockercontroller/doors').then((res) => {
-            doorArr = res.data.data.doors
-            
-            {Object.keys(doorArr).map((keykey) => {
-                //console.log(keykey)
-                
-                const api = doorURL+keykey+'/open'
-                axios.get(api).then((respo) => {
-                    console.log(api)
-                })
-            })}     
-        })
-    } 
+
 
     const endSession = () => {
         let newarr = []
-        axios.get(APIurl).then((res) => {
-                
-                axios.get('http://localhost:9090/api/lockercontroller/doors').then((res) => {
-                    
-                    newarr = res.data.data.doors
-                    
-                    {Object.keys(newarr).map((key) => {
-                        console.log(key)
-                        const api = doorURL +key+ '/open'
-                        axios.get(api).then((res) => {
+        /*** TODO  ***/
+        //axios.get('http://localhost:9090/api/lockercontroller/getAll').then(() => {
+        if(getCheckedValues().length == 0) {
 
-                        })
-                    })}
-                })
-               
-               //console.log(value)
-                //axios.get(api).then(respo => {
-                    /*** TODO  ***/
-                   /* 
-                    axios
-                    .get('http://localhost:3000/LockerDetails')
-                    .then((response) => {
-                    newarr = response.data
-                    
-                        {Object.values(newarr).map((key) => {
-                            axios.patch('http://localhost:3000/LockerDetails/'+key.id, {
-                                transID: "",
-                                lockerLocation: process.env.REACT_APP_LOCKER_LOCATION,
-                                doorSize: "S",
-                                doorStatus: 0,
-                                paymentStatus: "",
-                                payType: process.env.REACT_APP_PAYTYPE,
-                                amount: process.env.REACT_APP_LOCKER_PRICE,
-                                doorOpenCount: "",
-                                mpin: "",
-                                timeIn: "",
-                                timeOut: "",
-                                img_url: lockerFree,
-                                alias: ""
-    
-                            }).then(resp => {
-                                fetchOpenDoors()
-                                const selectAll = document.getElementById('select-all')
-                                Array.from(document.querySelectorAll('input[type="checkbox"]:not(#select-all)')).forEach(
-                                    element => {
-                                        selectAll.checked = false
-                                    })
-                            }).catch(error => {
-                                console.log(error);
-                            });
-                           
+        }
+        else {
+            axios
+            .get('http://localhost:3000/LockerDetails')
+            .then((response) => {
+            newarr = response.data
+                {Object.values(newarr).map((key) => {
+                    axios.get('http://localhost:3000/LockerDetails/'+doors, {
+                      
+
+                    }).then(resp => {
+                        {Object.values(resp).map((val) => {
+                            console.log(val.lockerLocation)
+                            /*axios.patch('http://localhost:3000/LockerDetails/'+ val.id, {
+                                    transID: "",
+                                    lockerLocation: val.lockerLocation,
+                                    doorSize: "S",
+                                    doorStatus: 1,
+                                    paymentStatus: val.paymentStatus,
+                                    payType: val.payType,
+                                    amount: val.amount,
+                                    doorOpenCount: "",
+                                    mpin: val.mpin,
+                                    timeIn: val.timeIn,
+                                    timeOut: "",
+                                    img_url: val.img_url,
+                                    alias: val.alias
+                                })*/
                         })}
                         
-                    })
-                    .catch((err) => {
-                        console.log(err)
-                    })*/
-               //})          
+                        fetchOpenDoors()
+                        const selectAll = document.getElementById('select-all')
+                        Array.from(document.querySelectorAll('input[type="checkbox"]:not(#select-all)')).forEach(
+                            element => {
+                                selectAll.checked = false
+                            })
+                    }).catch(error => {
+                        console.log(error);
+                    });
+                    
+                })}
                 
-        })
-      
-       
-        
+            })
+            .catch((err) => {
+                console.log(err)
+            })
+        }
             
+
+
+        //})
         
+   
     }
     
  const syncData = (sync) => {
@@ -359,7 +351,7 @@ export const Tabs = () =>{
     let arr = []
     let consArr = []
     
-    setSync('Synching local...')
+    setSync('Syncing local data to dashboard')
     document.getElementById('sync-data').disabled = true
     axios.get('http://localhost:3000/LocalData').then((res) => {
            arr = res.data
@@ -398,8 +390,7 @@ export const Tabs = () =>{
 
     useEffect(() => {
         setSync('Sync local data')
-
-      
+        toggleTab(1)
 
     },[])
 
@@ -410,21 +401,21 @@ export const Tabs = () =>{
             document.getElementById('session').classList.remove('active')
             document.getElementById('sync').classList.remove('active')
             document.getElementById('rebook').classList.add('active') 
-            fetchRebookData()
+            //fetchRebookData()
         }
         else if(index == 2){
             document.getElementById('forgot').classList.add('active')
             document.getElementById('session').classList.remove('active')
             document.getElementById('sync').classList.remove('active')
             document.getElementById('rebook').classList.remove('active')
-            fetchOpenDoors()
+            //fetchOpenDoors()
         }
         else if(index == 3){
             document.getElementById('forgot').classList.remove('active')
             document.getElementById('session').classList.add('active')
             document.getElementById('sync').classList.remove('active')
             document.getElementById('rebook').classList.remove('active')
-            fetchOpenDoors()
+            //fetchOpenDoors()
            /* if(getCheckedValues().length == 0){
                 document.getElementById('end-session').disabled = true
                }
@@ -438,7 +429,7 @@ export const Tabs = () =>{
             document.getElementById('session').classList.remove('active')
             document.getElementById('sync').classList.add('active')
             document.getElementById('rebook').classList.remove('active')
-            fetchRebookData()
+            //fetchRebookData()
         }
 
         if(cart.length > 5){
@@ -536,7 +527,7 @@ export const Tabs = () =>{
                     (() => {
                         if(index == 1) {
                             const status = <div className="tab-content py-3 z-index text-center">
-                                    <div className="col-md-12 bg-light py-3 px-3 rounded mb-3"><span className="text-danger"><strong>NOTE:</strong></span> If the user accidentally pressed the <strong>go home button</strong>, they can call the EK staff immediately to rebook the door for them.</div>
+                                    <div className="col-md-12 bg-light py-3 px-3 rounded mb-3"><span className="text-danger"><strong>NOTE:</strong></span> If the user accidentally pressed the <strong>go home button</strong>, use this function to rebook door without payment.</div>
                                     <span className="text-dark">Rebook Door</span>
                                     
                                     
@@ -570,7 +561,7 @@ export const Tabs = () =>{
                         if(index == 2) {
 
                             const status = <div className="tab-content py-3 mx-auto">
-                                    <div className="col-md-12 bg-light py-3 px-3 rounded mb-3"><span className="text-danger"><strong>NOTE:</strong></span> If the user forgot their pin, they can call the EK staff immediately to change their desired pin.</div>
+                                    <div className="col-md-12 bg-light py-3 px-3 rounded mb-3"><span className="text-danger"><strong>NOTE:</strong></span> If the user forgot their pin, use this function to create a new pin.</div>
                                     <span className="text-dark">Forgot Pin</span>
                                    
                                     <MUIDataTable
@@ -599,7 +590,7 @@ export const Tabs = () =>{
                         }  
                         if(index == 3) {
                             const status = <div className="tab-content py-3 mx-auto">
-                                <div className="col-md-12 bg-light py-3 px-3 rounded mb-3"><span className="text-danger"><strong>NOTE:</strong></span> This tab is use to end the active door sessions. Mostly, this tab is being used at the end of the day. This will open <strong>all doors</strong> and will eventually clear the selected sessions.</div>
+                                <div className="col-md-12 bg-light py-3 px-3 rounded mb-3"><span className="text-danger"><strong>NOTE:</strong></span> Use this to end the sessions. This will open <strong>all doors</strong> and clear all selected sessions.</div>
                                     <div><span className="text-dark">Sessions</span></div>
                                     
                                     <button className="btn btn-danger end-session mx-5" onClick={()=> endSession()} id='end-session' disabled={disable}>Test door and end selected session/s</button>
@@ -639,7 +630,7 @@ export const Tabs = () =>{
                         }  
                         if(index == 4) {
                             const status = <div className="tab-content py-3 mx-auto">
-                                <div className="col-md-12 bg-light py-3 px-3 rounded mb-3"><span className="text-danger"><strong>NOTE:</strong></span> Since this release is running locally, we need to make sure that everything is in proper validation. This tab is use to sync all the local datas to our server.</div>
+                                <div className="col-md-12 bg-light py-3 px-3 rounded mb-3"><span className="text-danger"><strong>NOTE:</strong></span> Data are stored locally. Sync the data to forward it to the dashboard. Internet connectivity is required for this function.</div>
                                     <span className="text-dark">Sync data</span>
                                     {
                                         (() => {

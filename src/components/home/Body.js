@@ -95,7 +95,14 @@ export const Body = ({setPopup}) =>{
 
     const checkDoors = () => {
         axios.get(APIUrl).then((res) => {
-            fetchDoors(res.data)
+            
+            if(res.data.length > 0) {
+                clearInterval(dataInterval)
+            }
+            else {
+                fetchDoors(res.data)
+            }
+            
         })
     }
     const postData = (key,status, timein, aliasData) => {
@@ -108,6 +115,11 @@ export const Body = ({setPopup}) =>{
         localStorage.setItem('timein',timein)
         localStorage.setItem('alias',aliasData)
         setDoorStatus(status)
+
+        if(status != 0) {
+            document.getElementById('lottie-wrapper').classList.add('opacity')
+        }
+       
     }
     const showText = () => {
         setShowText('password')
@@ -184,12 +196,8 @@ export const Body = ({setPopup}) =>{
         localStorage.removeItem('doorID')
         localStorage.removeItem('timein')
         localStorage.removeItem('alias')
-        if(localStorage.getItem('modalCheck') != 1){
-            document.getElementById('alias-text').value = ""
-        }
-        
+        document.getElementById('alias-text').value = ""
         localStorage.removeItem('modalCheck')
-        
      
     }
     function keyDown(e) { 
@@ -349,7 +357,7 @@ export const Body = ({setPopup}) =>{
                     
                 }
                 else {
-                    setErrorStatus('Wrong Mpin, cannot open door!')
+                    setErrorStatus('Wrong MPIN, cannot open door!')
                     setPin('')
                     setCart('')
                 }
@@ -412,7 +420,7 @@ export const Body = ({setPopup}) =>{
                     
                 }
                 else {
-                    setErrorStatus('Wrong Mpin, cannot open door!')
+                    setErrorStatus('Wrong MPIN, cannot open door!')
                     setPin('')
                     setCart('')
                 }
@@ -429,7 +437,7 @@ export const Body = ({setPopup}) =>{
            window.location.href="/admin"
         }
         else{
-            setErrorStatus('not matched')
+            setErrorStatus('Wrong admin password')
         }
     }
     useEffect(() => {
@@ -509,8 +517,8 @@ export const Body = ({setPopup}) =>{
                 numberorder.current.focus();
               }
         }
-        
-        
+        checkDoors()
+       
     })
 
 
@@ -675,7 +683,7 @@ export const Body = ({setPopup}) =>{
                                 <div onClick={() => handleClick(0)} disabled={disable} id="btn-number" className={point ? 'pointer' : ''}>0</div>
                                 <div onClick={()=>clearAll()} className="btn btn-danger mx-2 clear d-flex justify-content-center align-items-center">Clear pin</div>
                                 <input type="hidden" value={cart} id="hidden-text" onChange={(e) => setPin(e.target.value)}/>
-                                <div className="text-dark position-absolute lottie-wrapper  opacity" id="lottie-wrapper" >How would you like to open your locker?
+                                <div className="text-dark position-absolute lottie-wrapper opacity" id="lottie-wrapper" >How would you like to open your locker?
                                     <div className={activeReopen ? "col-md-12 border-radius my-3 lottie-multiple d-flex justify-content-around align-items-center  active" : "col-md-12 border-radius my-3 lottie-multiple d-flex justify-content-around align-items-center"} onClick={changeActive} id="lottie-multiple">
                                         <div><Player src={reopen} loop autoplay /></div>
                                         <div>Open and play at EK
