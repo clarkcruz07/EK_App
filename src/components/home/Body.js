@@ -473,9 +473,11 @@ export const Body = ({setPopup}) =>{
         if(cart.length > 5 && localStorage.getItem('modalCheck') != 1 ){
             setDisable(true)
             setPoint('pointer')
-            
-            document.getElementById('lottie-wrapper').classList.remove('opacity')
-            document.getElementById('lottie-multiple').classList.remove('pointer')
+            if(doorStatus ==1){
+                document.getElementById('lottie-wrapper').classList.remove('opacity')
+                document.getElementById('lottie-multiple').classList.remove('pointer')
+            }
+           
         }
         else if(cart.length < 4 && localStorage.getItem('modalCheck') != 1){
             setDisable(false)

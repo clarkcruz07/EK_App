@@ -226,7 +226,7 @@ th span{
 }
 div#select-all-wrapper {
     position: absolute;
-    top: 14.5rem;
+    top: 15.2rem;
     z-index: 99999;
     left: 4.7rem;
 }
@@ -235,5 +235,8 @@ div#select-all-wrapper {
 }
 #select-all-wrapper span {
     font-weight: bold;
+}
+.slick-slide div:nth-child(1) {
+    margin-top: 0.5rem;
 }
 /* */

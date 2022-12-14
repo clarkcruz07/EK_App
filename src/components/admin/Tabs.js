@@ -273,11 +273,13 @@ export const Tabs = () =>{
         let doorArr = []
         axios.get('http://localhost:9090/api/lockercontroller/doors').then((res) => {
             doorArr = res.data.data.doors
+            
             {Object.keys(doorArr).map((keykey) => {
-                console.log(keykey)
+                //console.log(keykey)
+                
                 const api = doorURL+keykey+'/open'
                 axios.get(api).then((respo) => {
-                    console.log(respo.data)
+                    console.log(api)
                 })
             })}     
         })
@@ -286,14 +288,24 @@ export const Tabs = () =>{
     const endSession = () => {
         let newarr = []
         axios.get(APIurl).then((res) => {
-            
-            {Object.values(res.data).map((value) => {
                 
-                    const api = doorURL+value.id+'/open'
-               //console.log(api)
-                axios.get(api).then(respo => {
-                    /*** TODO  */
+                axios.get('http://localhost:9090/api/lockercontroller/doors').then((res) => {
                     
+                    newarr = res.data.data.doors
+                    
+                    {Object.keys(newarr).map((key) => {
+                        console.log(key)
+                        const api = doorURL +key+ '/open'
+                        axios.get(api).then((res) => {
+
+                        })
+                    })}
+                })
+               
+               //console.log(value)
+                //axios.get(api).then(respo => {
+                    /*** TODO  ***/
+                   /* 
                     axios
                     .get('http://localhost:3000/LockerDetails')
                     .then((response) => {
@@ -331,11 +343,8 @@ export const Tabs = () =>{
                     })
                     .catch((err) => {
                         console.log(err)
-                    })
-               })
-                   
-               
-            })}            
+                    })*/
+               //})          
                 
         })
       
@@ -416,12 +425,13 @@ export const Tabs = () =>{
             document.getElementById('sync').classList.remove('active')
             document.getElementById('rebook').classList.remove('active')
             fetchOpenDoors()
-            if(getCheckedValues().length == 0){
+           /* if(getCheckedValues().length == 0){
                 document.getElementById('end-session').disabled = true
                }
                else {
                 document.getElementById('end-session').disabled = false
                }
+               */
         }
         else if(index == 4){
             document.getElementById('forgot').classList.remove('active')
@@ -590,10 +600,9 @@ export const Tabs = () =>{
                         if(index == 3) {
                             const status = <div className="tab-content py-3 mx-auto">
                                 <div className="col-md-12 bg-light py-3 px-3 rounded mb-3"><span className="text-danger"><strong>NOTE:</strong></span> This tab is use to end the active door sessions. Mostly, this tab is being used at the end of the day. This will open <strong>all doors</strong> and will eventually clear the selected sessions.</div>
-                                    <span className="text-dark">Sessions</span>
+                                    <div><span className="text-dark">Sessions</span></div>
                                     
-                                    <button  onClick={()=> testDoor()}>Test Door</button>
-                                    <button className="btn btn-danger end-session mx-5" onClick={()=> endSession(1)} id='end-session' disabled={disable}>End selected session/s</button>
+                                    <button className="btn btn-danger end-session mx-5" onClick={()=> endSession()} id='end-session' disabled={disable}>Test door and end selected session/s</button>
                                     <div id="select-all-wrapper"> <input type="checkbox" id="select-all" onClick={() => checkAll()}/><span>Select All</span> </div>
                                    
                                     <MUIDataTable
