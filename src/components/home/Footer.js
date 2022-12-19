@@ -4,7 +4,7 @@ export const Footer = ({popup}) =>{
     
 
     const showModal = () => {
-        console.log(popup)
+       
         localStorage.setItem('modalCheck', popup)
     }
     return (

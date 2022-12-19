@@ -45,7 +45,7 @@ export const Body = ({setPopup}) =>{
     const [urlSet, setURL] = useState('')
     const APIUrl = 'http://localhost:3000/LockerDetails'
     const doorURL = 'http://localhost:9090/api/lockercontroller/door/'
-    
+  
     let dataInterval = ""
     let newarr = []
     const fetchData = () => {
@@ -105,7 +105,7 @@ export const Body = ({setPopup}) =>{
             
         })
     }
-    const postData = (key,status, timein, aliasData) => {
+    const postData = (key,status, timein, aliasData, doorCount) => {
         
         setOverlay('hidden')
         setModal('hidden')
@@ -114,8 +114,8 @@ export const Body = ({setPopup}) =>{
         localStorage.setItem('doorID',key)
         localStorage.setItem('timein',timein)
         localStorage.setItem('alias',aliasData)
+        localStorage.setItem('doorCount', Number(doorCount))
         setDoorStatus(status)
-
         if(status != 0) {
             document.getElementById('lottie-wrapper').classList.add('opacity')
         }
@@ -196,6 +196,7 @@ export const Body = ({setPopup}) =>{
         localStorage.removeItem('doorID')
         localStorage.removeItem('timein')
         localStorage.removeItem('alias')
+        localStorage.removeItem('doorCount')
         if(localStorage.getItem('modalCheck') != 1){
             document.getElementById('alias-text').value = ""
         }
@@ -216,8 +217,8 @@ export const Body = ({setPopup}) =>{
                     headers: {
                       accept: 'application/json',
                       'content-type': 'application/json',
-                      //authorization: 'Basic c2tfbGl2ZV9hQ1g4cExSaUR1WFFnZ21BVUtzREh3RVo6'
-                      authorization: 'Basic c2tfdGVzdF9adDVGZVlhcVBmZmp3VWF1U3Y4RUVURFA6'
+                      authorization: 'Basic c2tfbGl2ZV9hQ1g4cExSaUR1WFFnZ21BVUtzREh3RVo6'
+                      //authorization: 'Basic c2tfdGVzdF9adDVGZVlhcVBmZmp3VWF1U3Y4RUVURFA6'
                     },
                     body: JSON.stringify({
                       data: {
@@ -248,6 +249,7 @@ export const Body = ({setPopup}) =>{
                         },1000)
                        
                         setcheckoutURL(response.data.attributes.redirect.checkout_url)
+                        console.log(response.data.attributes.redirect.checkout_url)
                         setURL('1')
                         document.getElementById('qr').classList.remove('hidden')
                          return () => clearInterval(dataInterval) 
@@ -269,8 +271,8 @@ export const Body = ({setPopup}) =>{
             method: 'GET',
             headers: {
               accept: 'application/json',
-              //authorization: 'Basic c2tfbGl2ZV9hQ1g4cExSaUR1WFFnZ21BVUtzREh3RVo6'
-              authorization: 'Basic c2tfdGVzdF9adDVGZVlhcVBmZmp3VWF1U3Y4RUVURFA6'
+                authorization: 'Basic c2tfbGl2ZV9hQ1g4cExSaUR1WFFnZ21BVUtzREh3RVo6'
+              //authorization: 'Basic c2tfdGVzdF9adDVGZVlhcVBmZmp3VWF1U3Y4RUVURFA6'
             }
           };
           
@@ -285,8 +287,8 @@ export const Body = ({setPopup}) =>{
                     headers: {
                       accept: 'application/json',
                       'content-type': 'application/json',
-                      //authorization: 'Basic c2tfbGl2ZV9hQ1g4cExSaUR1WFFnZ21BVUtzREh3RVo6'
-                      authorization: 'Basic c2tfdGVzdF9adDVGZVlhcVBmZmp3VWF1U3Y4RUVURFA6'
+                      authorization: 'Basic c2tfbGl2ZV9hQ1g4cExSaUR1WFFnZ21BVUtzREh3RVo6'
+                      //authorization: 'Basic c2tfdGVzdF9adDVGZVlhcVBmZmp3VWF1U3Y4RUVURFA6'
                       
                     },
                     body: JSON.stringify({
@@ -305,9 +307,9 @@ export const Body = ({setPopup}) =>{
                     .then(response => response.json())
                     .then(response => {
                         const status = response.data.attributes.status 
-                        console.log(pin+ " === " + door_number + " === " + transactionID + " === " +checkoutUrl + '=== ' + status)
+                        //console.log(pin+ " === " + door_number + " === " + transactionID + " === " +checkoutUrl + '=== ' + status)
                         if(status == 'paid'){
-                            //console.log(checkoutUrl + ' - ' + door_number + ' - ' + pin)
+                            //console.log(checkoutUrl)
                             axios.patch('http://localhost:3000/LockerDetails/'+door_number, {
                                 doorStatus: 1,
                                 paymentStatus: 'paid',
@@ -346,7 +348,7 @@ export const Body = ({setPopup}) =>{
     }
 
     const reopenDoor = (pin,doorid) => {
-        console.log(alias)
+        console.log(Number(localStorage.getItem('doorCount')) + 1)
        if(activeLottie == 1){
             axios.get('http://localhost:3000/LockerDetails/?id='+doorid+'&&mpin='+pin).then(res => {
                 if(res.data.length == 1){
@@ -457,6 +459,9 @@ export const Body = ({setPopup}) =>{
        localStorage.removeItem('modalCheck')
         //return () => clearInterval(dataInterval)  
          
+
+       
+      
     },[])
     const modalPopup = 1
     const numberorder = useRef(null);
@@ -528,6 +533,8 @@ export const Body = ({setPopup}) =>{
     })
 
 
+
+    
     return (
         <div className="row">
              
@@ -755,7 +762,7 @@ export const Body = ({setPopup}) =>{
                 }  
             
             
-            <div className="position-relative rounded-big col-md-12 mx-auto body-content d-flex justify-content-start flex-wrap">
+            <div className="position-relative rounded-big col-md-12 mx-auto body-content d-flex justify-content-start flex-wrap door-list">
             
             
             
@@ -766,10 +773,10 @@ export const Body = ({setPopup}) =>{
                         {
                             
                             if(item.doorStatus == 1){
-                                const doorStats = <div key={item.id} className="col-door col-md-2 d-flex justify-content-center align-items-center px-2 py-2" onClick={() => postData(item.id, item.doorStatus,item.timeIn, item.alias)}>
+                                const doorStats = <div key={item.id} className="col-door col-md-2 d-flex justify-content-center align-items-center px-2 py-2" onClick={() => postData(item.id, item.doorStatus,item.timeIn, item.alias,item.doorOpenCount)}>
                                      
                                 <h2 className="position-absolute color-white">
-                                {item.lockerLocation}{item.id}               
+                                {item.lockerLocation}{item.id}              
                                 </h2>
                                 <img src={item.img_url} />
                                 <h5 className="color-white position-absolute mt-5">{item.alias}</h5> 

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useEffect, useState} from 'react'
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -13,9 +13,42 @@ export const Header = () =>{
         autoplaySpeed: 10000,
         draggable: true
       };
+   // Online state
+   const [isOnline, setIsOnline] = useState(navigator.onLine);
+useEffect(() => {
+     // Update network status
+     const handleStatusChange = () => {
+        setIsOnline(navigator.onLine);
+      };
+  
+      // Listen to the online status
+      window.addEventListener('online', handleStatusChange);
+  
+      // Listen to the offline status
+      window.addEventListener('offline', handleStatusChange);
+  
+      // Specify how to clean up after this effect for performance improvment
+      return () => {
+        window.removeEventListener('online', handleStatusChange);
+        window.removeEventListener('offline', handleStatusChange);
+      };
+},[isOnline])
     return (
         <div className="row">
-           <div className="panel panel-default mb-5 bg-white w-80 mx-auto rounded-big  mt-5 footer">
+             <div className='col-12 w-100'>
+            <div className='row'>
+                {isOnline ? (
+                    <div className='alert alert-success'>
+                        <h6 className='text-success'>You Are Online</h6>
+                    </div>
+                ) : (
+                    <div className='alert alert-danger'>
+                        <h6 className='text-danger'>You Are Offline</h6>
+                    </div>
+                )}
+            </div>
+        </div>       
+           <div className="panel panel-default mb-5 bg-white w-80 mx-auto rounded-big  mt-3 footer">
                 <div className="panel-body p-3">
                     <div className="text-dark">
                         {/* slick */ }
